@@ -1,0 +1,582 @@
+ /* 全局样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 变量定义 */
+:root {
+    --primary-color: #1E90FF; /* 标准天蓝色 */
+    --background-color: #FFFFFF;
+    --text-color: #333333;
+    --transition: all 1.5s ease;
+}
+
+/* 基础样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Canvas样式 */
+#earthCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color);
+    z-index: 1;
+}
+
+/* 中心文字样式 */
+.center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    text-align: center;
+    overflow: hidden;
+    width: 100%;
+}
+
+.center-text h1 {
+    font-size: 2.0rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--text-color);
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-family: 'Courier New', monospace;
+    display: inline-block;
+}
+
+/* 单个字符样式 */
+.char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.5s ease;
+    position: relative;
+}
+
+/* 字符出现动画 */
+@keyframes charAppear {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(1.2);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.char.appear {
+    animation: charAppear 0.25s ease forwards;
+}
+
+/* 字符消失动画 */
+@keyframes charDisappear {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        visibility: visible;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(20px) scale(0.8);
+        visibility: hidden;
+    }
+}
+
+.char.disappear {
+    animation: charDisappear 0.25s ease forwards;
+    position: relative;
+}
+
+/* 文字整体闪烁动画 */
+@keyframes textBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 闪烁文字类 */
+.blink-text {
+    animation: textBlink 2s ease-in-out infinite;
+}
+
+/* 第一段文字线条样式 */
+.first-line {
+    height: 2px;
+    background-color: #333333;
+    width: 100%;
+    margin: 10px 0 0 0;
+    position: relative;
+    opacity: 0;
+    transform-origin: center;
+    transform: scaleX(0);
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+/* 第一段线条生长动画 */
+.first-line.grow {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+/* 第一段线条消失动画 */
+.first-line.disappear {
+    opacity: 0;
+    transform: scaleX(0);
+    transition: transform 0.5s ease, opacity 0.5s ease 0.2s;
+}
+
+/* 第二段文字线条样式 */
+.welcome-line {
+    height: 2px;
+    background-color: #333333;
+    width: 100%;
+    margin: 10px 0 0 0;
+    position: relative;
+    opacity: 0;
+    transform-origin: center;
+    transform: scaleX(0);
+}
+
+/* 线条循环生长动画 */
+@keyframes welcomeLineGrow {
+    0% {
+        opacity: 1;
+        transform: scaleX(0);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+/* 第二段线条生长动画 */
+.welcome-line.grow {
+    animation: welcomeLineGrow 2s ease-in-out infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .center-text h1 {
+        font-size: 1.8rem;
+        letter-spacing: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .center-text h1 {
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+    }
+}
+
+/* 进度线条容器样式 */
+.progress-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 100%;
+    height: 2px;
+    overflow: hidden;
+}
+
+/* 进度线条样式 */
+.progress-line {
+    position: absolute;
+    height: 2px;
+    background-color: #333333;
+    top: 0;
+    width: 0;
+    transition: width 0.5s ease;
+}
+
+/* 左侧线条 */
+.progress-line.left {
+    left: 0;
+    transform-origin: left center;
+}
+
+/* 右侧线条 */
+.progress-line.right {
+    right: 0;
+    transform-origin: right center;
+}
+
+/* 百分比数字样式 */
+.percentage-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333333;
+    font-family: 'Courier New', monospace;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.percentage-text.visible {
+    opacity: 1;
+}
+
+/* 主页面样式 */
+.main-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--background-color);
+    z-index: 3;
+    overflow: hidden;
+}
+
+/* 背景层样式 */
+.background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    /* 添加网格背景 */
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+/* 几何形状基础样式 */
+.geometry {
+    position: absolute;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* 几何形状具体样式 - 参考图风格 */
+.shape-1 {
+    width: 200px;
+    height: 200px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    top: 30%;
+    left: 25%;
+}
+
+.shape-2 {
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    top: 40%;
+    left: 30%;
+    transform: rotate(15deg);
+}
+
+.shape-3 {
+    width: 300px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.2);
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+}
+
+.shape-4 {
+    width: 1px;
+    height: 250px;
+    background-color: rgba(0, 0, 0, 0.2);
+    top: 37.5%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.shape-5 {
+    width: 1px;
+    height: 250px;
+    background-color: rgba(0, 0, 0, 0.2);
+    top: 37.5%;
+    left: 33.33%;
+}
+
+.shape-6 {
+    width: 1px;
+    height: 250px;
+    background-color: rgba(0, 0, 0, 0.2);
+    top: 37.5%;
+    left: 66.67%;
+}
+
+.shape-7 {
+    width: 120px;
+    height: 120px;
+    background-color: rgba(0, 0, 0, 0.05);
+    top: 20%;
+    right: 20%;
+    transform: rotate(45deg);
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.shape-8 {
+    width: 80px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+    bottom: 30%;
+    right: 25%;
+    transform: rotate(15deg);
+}
+
+.shape-9 {
+    width: 150px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.2);
+    bottom: 40%;
+    right: 10%;
+    transform: rotate(45deg);
+}
+
+.shape-10 {
+    width: 100px;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.2);
+    bottom: 45%;
+    right: 15%;
+    transform: rotate(60deg);
+}
+
+/* 内容层样式 */
+.content-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 主内容样式 */
+.main-content {
+    text-align: center;
+    max-width: 800px;
+    padding: 0 20px;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    position: relative;
+}
+
+/* 主标题样式 */
+.main-title {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+/* 额外文字容器样式 */
+.additional-text {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 2;
+}
+
+/* 极简文字样式 */
+.minimal-text {
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+/* 框容器样式 */
+.boxes-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* 调整为参考图中的间距 */
+    margin-top: 60px; /* 调整为参考图中的垂直间距 */
+    position: relative;
+    z-index: 2;
+    flex-wrap: nowrap; /* 保持水平排列 */
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    /* 确保容器居中，不影响十字形符号位置 */
+    top: 0;
+    left: 0;
+    transform: none;
+}
+
+/* 单个框样式 */
+.box {
+    width: 100px; /* 调整为参考图中的宽度 */
+    height: 70px; /* 调整为参考图中的高度 */
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(1px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* 框的内部装饰 */
+.box::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 30%;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* 框的悬停效果 */
+.box:hover {
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    transform: translateY(-5px);
+}
+
+/* 框的悬停内部装饰变化 */
+.box:hover::before {
+    width: 60%;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* 文字旋转变形为圆形的动画 */
+@keyframes textToCircle {
+    0% {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+        border-radius: 0;
+        background-color: transparent;
+        border: none;
+    }
+    50% {
+        opacity: 1;
+        transform: rotate(360deg) scale(1.5);
+        border-radius: 50%;
+        background-color: transparent;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(720deg) scale(0.5);
+        border-radius: 50%;
+        background-color: transparent;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* 圆形缩小移动到shape-1位置的动画 */
+@keyframes circleToShape1 {
+    0% {
+        opacity: 1;
+        transform: rotate(720deg) scale(0.5);
+        border-radius: 50%;
+        left: 50%;
+        top: 50%;
+        width: 400px;
+        height: 400px;
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(1080deg) scale(0.3);
+        border-radius: 50%;
+        left: 10%;
+        top: 10%;
+        width: 200px;
+        height: 200px;
+    }
+}
+
+/* 文字旋转变形类 */
+.text-to-circle {
+    animation: textToCircle 1s ease forwards;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background-color: transparent !important;
+    overflow: visible !important;
+}
+
+/* 圆形移动类 */
+.circle-to-shape1 {
+    animation: circleToShape1 1.5s ease forwards;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background-color: transparent !important;
+    z-index: 10 !important;
+    width: 400px !important;
+    height: 400px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 从中间向两边扩大的动画类 */
+.fade-in-expand {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

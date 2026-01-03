@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-ART</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="earthCanvas"></canvas>
+    <div class="center-text">
+        <h1 id="animated-text"></h1>
+    </div>
+    
+    <!-- 新的基础页面 -->
+    <div class="main-page" id="mainPage" style="display: none;">
+        <!-- 背景层 -->
+        <div class="background-layer">
+            <div class="geometry shape-1"></div>
+            <div class="geometry shape-2"></div>
+            <div class="geometry shape-3"></div>
+            <div class="geometry shape-4"></div>
+            <div class="geometry shape-5"></div>
+            <div class="geometry shape-6"></div>
+            <div class="geometry shape-7"></div>
+            <div class="geometry shape-8"></div>
+            <div class="geometry shape-9"></div>
+            <div class="geometry shape-10"></div>
+        </div>
+        
+        <!-- 内容层 -->
+        <div class="content-layer">
+            <div class="main-content">
+                <header class="main-header">
+                    <h1 class="main-title">NULL POINT</h1>
+                </header>
+                <div class="additional-text">
+                    <p class="minimal-text">Minimalist</p>
+                    <p class="minimal-text">Futuristic</p>
+                </div>
+                
+                <!-- 添加参考图中的框 -->
+                <div class="boxes-container">
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                    <div class="box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
