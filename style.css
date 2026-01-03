@@ -548,6 +548,12 @@ body {
     box-sizing: border-box;
     cursor: pointer;
     z-index: 10;
+    
+    /* 禁用手机端触摸高亮效果 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 /* 框放大效果 */
