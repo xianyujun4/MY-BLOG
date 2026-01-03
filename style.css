@@ -44,6 +44,8 @@ body {
     text-align: center;
     overflow: hidden;
     width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .center-text h1 {
@@ -55,6 +57,9 @@ body {
     white-space: nowrap;
     font-family: 'Courier New', monospace;
     display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* 单个字符样式 */
@@ -376,11 +381,12 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: var(--background-color);
     z-index: 3;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 /* 背景层样式 */
@@ -398,6 +404,19 @@ body {
         linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
     background-size: 50px 50px;
+}
+
+/* 背景层网格响应式 */
+@media (max-width: 768px) {
+    .background-layer {
+        background-size: 40px 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .background-layer {
+        background-size: 25px 25px;
+    }
 }
 
 /* 几何形状基础样式 */
@@ -511,6 +530,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* 主内容样式 */

@@ -39,6 +39,22 @@ class ParticleEarth {
         this.canvas.height = window.innerHeight;
         this.centerX = this.canvas.width / 2;
         this.centerY = this.canvas.height / 2;
+        
+        // 根据屏幕尺寸调整粒子数量和地球半径
+        const newParticleCount = window.innerWidth < 768 ? 1000 : 2000;
+        const newRadius = window.innerWidth < 768 ? 150 : 200;
+        
+        // 只有在数量或半径变化时才重新创建粒子
+        if (this.particleCount !== newParticleCount || this.radius !== newRadius) {
+            this.particleCount = newParticleCount;
+            this.radius = newRadius;
+            this.targetRadius = newRadius;
+            this.depth = window.innerWidth < 768 ? 300 : 400;
+            this.targetDepth = window.innerWidth < 768 ? 150 : 200;
+            
+            // 重新创建粒子
+            this.createParticles();
+        }
     }
     
     createParticles() {
