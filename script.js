@@ -590,12 +590,222 @@ function showNewText() {
                     mainContent.classList.add('fade-in-expand');
                     
                     // 为框添加动画类，在内容出现后延迟显示
-                    const boxes = mainPage.querySelectorAll('.box');
-                    boxes.forEach((box, index) => {
+                const boxes = mainPage.querySelectorAll('.box');
+                boxes.forEach((box, index) => {
+                    setTimeout(() => {
+                        box.classList.add('fade-in-expand');
+                        
+                        // 文字保持静态显示，不需要自动淡入动画
+                    }, index * 30 + 100); // 每个框间隔30ms，整体延迟100ms
+                });
+                
+                // 为所有框添加点击事件监听
+                boxes.forEach(box => {
+                    box.addEventListener('click', () => {
+                        // 获取框的当前位置和尺寸
+                        const rect = box.getBoundingClientRect();
+                        
+                        // 保存原框的样式，用于恢复
+                        const originalBorder = box.style.border;
+                        const originalBackground = box.style.background;
+                        const originalZIndex = box.style.zIndex;
+                        
+                        // 创建一个新的放大元素，而不是修改原元素
+                        const expandedBox = document.createElement('div');
+                        expandedBox.className = 'expanded-box';
+                        
+                        // 获取原框内的文字内容
+                        const boxText = box.querySelector('.box-text');
+                        if (boxText) {
+                            // 隐藏原框内的文字
+                            boxText.style.opacity = '0';
+                            
+                            // 创建新的文字容器
+                            const textContainer = document.createElement('div');
+                            textContainer.className = 'new-text-container';
+                            textContainer.style.position = 'absolute';
+                            textContainer.style.top = '50px'; // 与顶部保持间距
+                            textContainer.style.left = '50px'; // 与左部保持间距
+                            textContainer.style.zIndex = '99999';
+                            textContainer.style.overflow = 'hidden';
+                            
+                            // 创建新文字元素
+                            const newText = document.createElement('div');
+                            newText.className = 'new-text';
+                            newText.textContent = boxText.textContent;
+                            newText.style.fontFamily = 'Courier New, monospace';
+                            newText.style.fontSize = '2rem';
+                            newText.style.fontWeight = '700';
+                            newText.style.color = 'var(--text-color)';
+                            newText.style.textTransform = 'uppercase';
+                            newText.style.letterSpacing = '8px';
+                            newText.style.opacity = '0';
+                            newText.style.transform = 'translateX(-100%)';
+                            newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
+                            
+                            // 创建线条元素
+                            const line = document.createElement('div');
+                            line.className = 'new-text-line';
+                            line.style.height = '2px';
+                            line.style.backgroundColor = 'var(--text-color)';
+                            line.style.width = '0';
+                            line.style.marginBottom = '10px';
+                            line.style.transformOrigin = 'left center';
+                            line.style.transition = 'width 0.8s ease 1s'; // 延迟1秒开始，与文字飞入动画衔接
+                            
+                            // 组装元素
+                            textContainer.appendChild(line);
+                            textContainer.appendChild(newText);
+                            expandedBox.appendChild(textContainer);
+                            
+                            // 触发动画
+                            setTimeout(() => {
+                                newText.style.opacity = '1';
+                                newText.style.transform = 'translateX(0)';
+                                
+                                // 文字飞入后触发线条生长动画
+                                setTimeout(() => {
+                                    // 获取文字宽度并设置线条宽度
+                                    const textWidth = newText.offsetWidth;
+                                    line.style.width = `${textWidth}px`;
+                                }, 1000); // 与文字飞入动画时长一致
+                            }, 600); // 放大动画结束后开始文字飞入（放大动画持续500ms）
+                        }
+                        
+                        // 设置初始样式，与原框位置一致，包括边框
+                        expandedBox.style.position = 'fixed';
+                        expandedBox.style.top = `${rect.top}px`;
+                        expandedBox.style.left = `${rect.left}px`;
+                        expandedBox.style.width = `${rect.width}px`;
+                        expandedBox.style.height = `${rect.height}px`;
+                        expandedBox.style.backgroundColor = 'white';
+                        expandedBox.style.border = window.getComputedStyle(box).border; // 复制原框的边框样式
+                        expandedBox.style.zIndex = '100'; // 低z-index，确保原框可见
+                        expandedBox.style.opacity = '1';
+                        expandedBox.style.transition = 'width 0.5s ease, height 0.5s ease, top 0.5s ease, left 0.5s ease, border 0s';
+                        expandedBox.style.cursor = 'pointer';
+                        expandedBox.style.transformOrigin = 'center center';
+                        
+                        // 确保原框在放大过程中可见，提高原框的z-index
+                        box.style.zIndex = '9999';
+                        box.style.position = 'relative';
+                        
+                        // 添加到body中
+                        document.body.appendChild(expandedBox);
+                        
+                        // 强制浏览器重排，确保动画能正确触发
+                        expandedBox.offsetHeight;
+                        
+                        // 开始放大动画
                         setTimeout(() => {
-                            box.classList.add('fade-in-expand');
-                        }, index * 30 + 100); // 每个框间隔30ms，整体延迟100ms
+                            expandedBox.style.top = '0';
+                            expandedBox.style.left = '0';
+                            expandedBox.style.width = '100vw';
+                            expandedBox.style.height = '100vh';
+                        }, 10);
+                        
+                        // 放大动画结束后（0.5秒），设置新元素的z-index覆盖原框
+                        setTimeout(() => {
+                            expandedBox.style.zIndex = '9999'; // 放大后覆盖原框
+                            box.style.border = 'none';
+                            box.style.background = 'none';
+                        }, 500);
+                        
+                        // 添加点击关闭功能
+                        const closeHandler = () => {
+                            // 恢复原框的样式
+                            box.style.border = originalBorder || '';
+                            box.style.background = originalBackground || '';
+                            box.style.zIndex = originalZIndex || '10'; // 恢复原z-index
+                            
+                            // 恢复原框内文字的可见性
+                            const boxText = box.querySelector('.box-text');
+                            if (boxText) {
+                                boxText.style.opacity = '1';
+                            }
+                            
+                            // 获取新文字容器和线条元素
+                            const textContainer = expandedBox.querySelector('.new-text-container');
+                            const newText = expandedBox.querySelector('.new-text');
+                            const line = expandedBox.querySelector('.new-text-line');
+                            
+                            if (textContainer && newText && line) {
+                                // 1. 线条从右往左缩小动画
+                                line.style.transition = 'width 0.8s ease';
+                                line.style.width = '0';
+                                line.style.transformOrigin = 'right center';
+                                
+                                // 2. 线条缩小完成后，文字从左侧飞出
+                                setTimeout(() => {
+                                    newText.style.transition = 'opacity 0.5s ease, transform 1s ease-in';
+                                    newText.style.opacity = '0';
+                                    newText.style.transform = 'translateX(-100%)';
+                                    
+                                    // 3. 文字飞出完成后，执行原本的框缩小动画
+                                    setTimeout(() => {
+                                        // 开始缩小动画，与放大逻辑一致
+                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        
+                                        // 强制浏览器重排，确保动画能正确触发
+                                        expandedBox.offsetHeight;
+                                        
+                                        // 开始缩小动画
+                                        setTimeout(() => {
+                                            expandedBox.style.top = `${rect.top}px`;
+                                            expandedBox.style.left = `${rect.left}px`;
+                                            expandedBox.style.width = `${rect.width}px`;
+                                            expandedBox.style.height = `${rect.height}px`;
+                                            // 缩小过程中保持边框可见，不立即设置opacity
+                                        }, 10);
+                                        
+                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                        setTimeout(() => {
+                                            expandedBox.style.opacity = '0';
+                                            
+                                            // 延迟移除元素，确保透明度动画完成
+                                            setTimeout(() => {
+                                                if (expandedBox.parentNode) {
+                                                    expandedBox.parentNode.removeChild(expandedBox);
+                                                }
+                                            }, 100);
+                                        }, 500);
+                                    }, 1000); // 文字飞出动画时长1秒
+                                }, 800); // 线条缩小动画时长0.8秒
+                            } else {
+                                // 如果没有新文字元素，直接执行原本的缩小动画
+                                // 开始缩小动画，与放大逻辑一致
+                                expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                
+                                // 强制浏览器重排，确保动画能正确触发
+                                expandedBox.offsetHeight;
+                                
+                                // 开始缩小动画
+                                setTimeout(() => {
+                                    expandedBox.style.top = `${rect.top}px`;
+                                    expandedBox.style.left = `${rect.left}px`;
+                                    expandedBox.style.width = `${rect.width}px`;
+                                    expandedBox.style.height = `${rect.height}px`;
+                                    // 缩小过程中保持边框可见，不立即设置opacity
+                                }, 10);
+                                
+                                // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                setTimeout(() => {
+                                    expandedBox.style.opacity = '0';
+                                    
+                                    // 延迟移除元素，确保透明度动画完成
+                                    setTimeout(() => {
+                                        if (expandedBox.parentNode) {
+                                            expandedBox.parentNode.removeChild(expandedBox);
+                                        }
+                                    }, 100);
+                                }, 500);
+                            }
+                        };
+                        
+                        // 点击放大后的元素关闭
+                        expandedBox.addEventListener('click', closeHandler);
                     });
+                });
                 }, geometryElements.length * 50);
             }, 100); // 小延迟确保页面已显示
             

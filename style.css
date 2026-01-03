@@ -526,6 +526,30 @@ body {
     transform: scale(0);
     transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* 框放大效果 */
+.box.expanded {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: auto !important;
+    max-width: none !important;
+    min-height: auto !important;
+    max-height: none !important;
+    z-index: 9999 !important;
+    background-color: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    transition: all 0.5s ease !important;
+    transform: none !important;
+    transform-origin: center center !important;
+    opacity: 1 !important;
 }
 
 /* 手机端适配 - 确保一行排开 */
@@ -663,6 +687,83 @@ body {
 .fade-in-expand {
     opacity: 1 !important;
     transform: scale(1) !important;
+}
+
+/* 框内文字样式 - 与WELCOME文字字体保持一致 */
+.box-text {
+    position: absolute;
+    top: 60%; /* 调整到线的下方 */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.2vw;
+    transition: all 0.5s ease;
+    opacity: 1;
+    z-index: 1;
+    /* 移除默认闪烁动画，只在悬停时触发 */
+}
+
+/* 电脑端文字大小 */
+@media (min-width: 768px) {
+    .box-text {
+        font-size: 0.8rem;
+        letter-spacing: 4px;
+    }
+}
+
+/* 手机端文字大小 */
+@media (max-width: 768px) {
+    .box-text {
+        font-size: 1.5vw;
+        letter-spacing: 2px;
+    }
+}
+
+/* 小屏手机文字大小 */
+@media (max-width: 480px) {
+    .box-text {
+        font-size: 1.8vw;
+        letter-spacing: 1px;
+    }
+}
+
+/* 框被选中时文字动画 */
+.box:hover .box-text,
+.box:active .box-text,
+.box:focus .box-text {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+    color: var(--text-color); /* 保持黑色，不使用主题色 */
+    letter-spacing: 0.3vw;
+    animation: none; /* 停止闪烁动画 */
+}
+
+/* 放大状态下的文字样式 */
+.expanded-box .box-text {
+    font-size: 3vw;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    color: var(--text-color); /* 保持黑色，不使用主题色 */
+    z-index: 9999;
+    pointer-events: none;
+    letter-spacing: 8px;
+    animation: none;
+}
+
+/* 框的内部装饰线 - 调整位置，为文字腾出空间 */
+.box::before {
+    content: '';
+    position: absolute;
+    top: 40%; /* 调整到文字上方 */
+    left: 10px;
+    width: 30%;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 /* 滚动条样式 */
