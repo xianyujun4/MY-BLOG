@@ -4,16 +4,18 @@ class ParticleEarth {
         this.canvas = document.getElementById('earthCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
-        this.particleCount = 2000;
+        // 根据屏幕尺寸调整粒子数量
+        this.particleCount = window.innerWidth < 768 ? 1000 : 2000;
         this.rotationX = 0;
         this.rotationY = 0;
         this.rotationSpeed = 0.002;
-        this.radius = 200;
-        this.targetRadius = 200; // 目标半径，用于放大效果
+        // 根据屏幕尺寸调整地球半径
+        this.radius = window.innerWidth < 768 ? 150 : 200;
+        this.targetRadius = this.radius; // 目标半径，用于放大效果
         this.centerX = 0;
         this.centerY = 0;
-        this.depth = 400;
-        this.targetDepth = 200; // 目标深度，用于进入效果
+        this.depth = window.innerWidth < 768 ? 300 : 400;
+        this.targetDepth = window.innerWidth < 768 ? 150 : 200; // 目标深度，用于进入效果
         this.alpha = 0; // 地球透明度，用于渐显效果
         this.fadeSpeed = 0.001; // 渐显速度
         this.isScaling = false; // 是否正在放大

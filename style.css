@@ -180,16 +180,141 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+    /* 中心文字响应式 */
     .center-text h1 {
         font-size: 1.8rem;
         letter-spacing: 3px;
     }
+    
+    /* 主页面标题响应式 */
+    .main-title {
+        font-size: 3rem;
+        letter-spacing: 8px;
+    }
+    
+    /* 背景几何形状响应式 */
+    .shape-1 {
+        width: 150px;
+        height: 150px;
+        top: 25%;
+        left: 20%;
+    }
+    
+    .shape-2 {
+        width: 120px;
+        height: 120px;
+        top: 35%;
+        left: 25%;
+    }
+    
+    .shape-7 {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .shape-8 {
+        width: 60px;
+        height: 15px;
+    }
+    
+    /* 框容器响应式 */
+    .boxes-container {
+        gap: 20px;
+        margin-top: 80px;
+        max-width: 500px;
+    }
+    
+    .box {
+        width: 80px;
+        height: 60px;
+    }
 }
 
 @media (max-width: 480px) {
+    /* 中心文字响应式 */
     .center-text h1 {
         font-size: 1.2rem;
         letter-spacing: 2px;
+    }
+    
+    /* 主页面标题响应式 */
+    .main-title {
+        font-size: 2rem;
+        letter-spacing: 6px;
+    }
+    
+    /* 辅助文字响应式 */
+    .minimal-text {
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+    }
+    
+    /* 背景几何形状响应式 */
+    .shape-1 {
+        width: 120px;
+        height: 120px;
+        top: 20%;
+        left: 15%;
+    }
+    
+    .shape-2 {
+        width: 100px;
+        height: 100px;
+        top: 30%;
+        left: 20%;
+    }
+    
+    .shape-3 {
+        width: 200px;
+    }
+    
+    .shape-7 {
+        width: 60px;
+        height: 60px;
+        top: 15%;
+        right: 15%;
+    }
+    
+    .shape-8 {
+        width: 50px;
+        height: 12px;
+        bottom: 25%;
+        right: 20%;
+    }
+    
+    /* 框容器响应式 - 改为垂直排列 */
+    .boxes-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-top: 60px;
+        max-width: 200px;
+    }
+    
+    .box {
+        width: 120px;
+        height: 80px;
+    }
+    
+    /* 额外文字容器响应式 */
+    .additional-text {
+        gap: 20px;
+        margin-top: 20px;
+    }
+}
+
+/* 过渡圆形响应式 */
+@media (max-width: 768px) {
+    #transition-circle {
+        width: 300px !important;
+        height: 300px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #transition-circle {
+        width: 250px !important;
+        height: 250px !important;
     }
 }
 
