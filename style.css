@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-
+    
     /* 全局禁用手机端触摸高亮效果 */
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -800,5 +800,4 @@ body {
 body {
     -ms-overflow-style: none;
     scrollbar-width: none;
-
 }

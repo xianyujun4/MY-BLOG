@@ -24,9 +24,35 @@ class ParticleEarth {
         this.fadeOutSpeed = 0.01; // 消失速度
         this.isVisible = true; // 地球是否可见，初始为true
         
+        // 鼠标拖动相关变量
+        this.isDragging = false;
+        this.lastMouseX = 0;
+        this.lastMouseY = 0;
+        this.dragSpeed = 0.005;
+        
+        // 线条相关变量
+        this.lineCount = window.innerWidth < 768 ? 1000 : 2000; // 增加线条数量，提高可见性
+        this.maxLineDistance = 60; // 增加最大线条长度，使更多线条可见
+        this.lineOpacity = 0.5; // 增加线条透明度
+        this.lineWidth = 0.8; // 增加线条宽度
+        this.lineColor = '#000000ff'; // 连接线使用黑色
+        
+        // 粒子出现相关变量
+        this.isEmitting = true; // 是否正在出现粒子
+        this.emissionProgress = 0; // 出现进度，0-1
+        this.emissionSpeed = 0.0025; // 出现速度，加速5倍
+        
+        // 连接线条动画变量
+        this.isConnecting = false; // 是否正在连接线条
+        this.connectionProgress = 0; // 连接进度，0-1
+        this.connectionSpeed = 0.01; // 连接速度
+        this.connections = []; // 存储连接信息
+        this.connectedPairs = new Set(); // 已连接的粒子对，避免重复连接
+        
         this.init();
         this.animate();
         window.addEventListener('resize', () => this.resizeCanvas());
+        this.setupMouseEvents();
     }
     
     init() {
@@ -60,8 +86,9 @@ class ParticleEarth {
     createParticles() {
         this.particles = [];
         
+        // 生成所有粒子
         for (let i = 0; i < this.particleCount; i++) {
-            // 随机生成球面上的点
+            // 随机生成球面上的点（目标位置）
             const phi = Math.acos(Math.random() * 2 - 1);
             const theta = Math.random() * Math.PI * 2;
             
@@ -70,20 +97,41 @@ class ParticleEarth {
             const z = this.radius * Math.cos(phi);
             
             this.particles.push({
+                // 当前位置，直接在目标位置
                 x: x,
                 y: y,
                 z: z,
+                // 目标位置
+                targetX: x,
+                targetY: y,
+                targetZ: z,
+                // 原始位置（目标位置）
                 originalX: x,
                 originalY: y,
                 originalZ: z,
                 size: Math.random() * 1.0 + 0.5,
-                opacity: Math.random() * 0.8 + 0.2
+                opacity: Math.random() * 0.8 + 0.2,
+                // 粒子可见性，初始不可见，用于逐步出现效果
+                isVisible: false,
+                // 粒子就绪状态，初始未就绪
+                isReady: false,
+                // 粒子出现进度，0-1
+                appearProgress: 0,
+                // 出现速度
+                speed: Math.random() * 0.02 + 0.01
             });
         }
+        
+        // 按纬度从下而上排序粒子，从南极到北极
+        // 南极的z坐标最小，北极的z坐标最大，所以按z坐标从小到大排序
+        this.particles.sort((a, b) => a.targetZ - b.targetZ);
     }
     
     rotateParticles() {
-        this.rotationY += this.rotationSpeed;
+        // 只有在不拖动时才自动旋转
+        if (!this.isDragging) {
+            this.rotationY += this.rotationSpeed;
+        }
         
         for (let particle of this.particles) {
             // 保存原始坐标
@@ -114,6 +162,72 @@ class ParticleEarth {
         }
     }
     
+    // 设置鼠标事件监听
+    setupMouseEvents() {
+        // 鼠标按下事件
+        this.canvas.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.lastMouseX = e.clientX;
+            this.lastMouseY = e.clientY;
+        });
+        
+        // 鼠标移动事件
+        this.canvas.addEventListener('mousemove', (e) => {
+            if (this.isDragging) {
+                const deltaX = e.clientX - this.lastMouseX;
+                const deltaY = e.clientY - this.lastMouseY;
+                
+                // 根据鼠标移动距离调整旋转角度
+                this.rotationY += deltaX * this.dragSpeed;
+                this.rotationX += deltaY * this.dragSpeed;
+                
+                // 更新上次鼠标位置
+                this.lastMouseX = e.clientX;
+                this.lastMouseY = e.clientY;
+            }
+        });
+        
+        // 鼠标释放事件
+        this.canvas.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+        
+        // 鼠标离开画布事件
+        this.canvas.addEventListener('mouseleave', () => {
+            this.isDragging = false;
+        });
+        
+        // 触摸事件支持（移动端）
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                this.isDragging = true;
+                this.lastMouseX = e.touches[0].clientX;
+                this.lastMouseY = e.touches[0].clientY;
+            }
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (this.isDragging && e.touches.length > 0) {
+                const deltaX = e.touches[0].clientX - this.lastMouseX;
+                const deltaY = e.touches[0].clientY - this.lastMouseY;
+                
+                this.rotationY += deltaX * this.dragSpeed;
+                this.rotationX += deltaY * this.dragSpeed;
+                
+                this.lastMouseX = e.touches[0].clientX;
+                this.lastMouseY = e.touches[0].clientY;
+            }
+        });
+        
+        this.canvas.addEventListener('touchend', () => {
+            this.isDragging = false;
+        });
+        
+        this.canvas.addEventListener('touchcancel', () => {
+            this.isDragging = false;
+        });
+    }
+    
     projectParticles() {
         for (let particle of this.particles) {
             // 3D到2D投影
@@ -137,10 +251,81 @@ class ParticleEarth {
         // 按Z坐标排序，确保正确的深度关系
         this.particles.sort((a, b) => b.z - a.z);
         
+        // 1. 绘制连接线条动画（从两点同时出发，在中间交汇）
+        if (this.isConnecting) {
+            this.ctx.strokeStyle = this.lineColor;
+            this.ctx.lineWidth = this.lineWidth;
+            
+            for (let connection of this.connections) {
+                const p1 = connection.p1;
+                const p2 = connection.p2;
+                
+                if (p1.isVisible && p2.isVisible && p1.screenSize > 0 && p2.screenSize > 0) {
+                    // 计算连接线条的透明度
+                    const avgOpacity = (p1.screenOpacity + p2.screenOpacity) / 2 * this.alpha * this.lineOpacity;
+                    this.ctx.globalAlpha = avgOpacity;
+                    
+                    // 计算两点之间的中间点
+                    const midX = (p1.screenX + p2.screenX) / 2;
+                    const midY = (p1.screenY + p2.screenY) / 2;
+                    
+                    // 计算从p1到mid的进度
+                    const progress1 = Math.min(this.connectionProgress * 2, 1);
+                    // 计算从p2到mid的进度
+                    const progress2 = Math.min((this.connectionProgress - 0.5) * 2, 1);
+                    
+                    // 绘制从p1出发的线条
+                    const endX1 = p1.screenX + (midX - p1.screenX) * progress1;
+                    const endY1 = p1.screenY + (midY - p1.screenY) * progress1;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1.screenX, p1.screenY);
+                    this.ctx.lineTo(endX1, endY1);
+                    this.ctx.stroke();
+                    
+                    // 绘制从p2出发的线条，当进度超过0.5时开始
+                    if (this.connectionProgress > 0.5) {
+                        const endX2 = p2.screenX + (midX - p2.screenX) * progress2;
+                        const endY2 = p2.screenY + (midY - p2.screenY) * progress2;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(p2.screenX, p2.screenY);
+                        this.ctx.lineTo(endX2, endY2);
+                        this.ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        // 2. 绘制已连接的固定线条
+        if (!this.isConnecting && this.connectionProgress >= 1) {
+            this.ctx.strokeStyle = this.lineColor;
+            this.ctx.lineWidth = this.lineWidth;
+            
+            for (let connection of this.connections) {
+                const p1 = connection.p1;
+                const p2 = connection.p2;
+                
+                if (p1.isVisible && p2.isVisible && p1.screenSize > 0 && p2.screenSize > 0) {
+                    // 计算连接线条的透明度
+                    const avgOpacity = (p1.screenOpacity + p2.screenOpacity) / 2 * this.alpha * this.lineOpacity;
+                    this.ctx.globalAlpha = avgOpacity;
+                    
+                    // 绘制完整的连接线
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(p1.screenX, p1.screenY);
+                    this.ctx.lineTo(p2.screenX, p2.screenY);
+                    this.ctx.stroke();
+                }
+            }
+        }
+        
+        // 3. 绘制粒子（在所有线条之上）
         this.ctx.fillStyle = '#000000ff';
         
         for (let particle of this.particles) {
-            if (particle.screenSize > 0) {
+            // 只绘制可见的粒子
+            if (particle.isVisible && particle.screenSize > 0) {
                 // 应用整体透明度和粒子自身透明度
                 this.ctx.globalAlpha = particle.screenOpacity * this.alpha;
                 this.ctx.beginPath();
@@ -179,11 +364,155 @@ class ParticleEarth {
             }
         }
         
+        // 粒子逐步出现动画
+        if (this.isEmitting) {
+            // 更新发射进度
+            this.emissionProgress += this.emissionSpeed;
+            
+            // 确保发射进度不超过1
+            if (this.emissionProgress > 1) {
+                this.emissionProgress = 1;
+            }
+            
+            // 处理所有粒子，让每个粒子根据发射进度逐步出现
+            for (let i = 0; i < this.particles.length; i++) {
+                const particle = this.particles[i];
+                
+                // 计算该粒子的触发阈值，基于其索引，实现从下到上的出现顺序
+                const particleThreshold = i / this.particles.length;
+                
+                // 如果当前发射进度超过该粒子的触发阈值，该粒子开始出现
+                if (this.emissionProgress >= particleThreshold) {
+                    // 根据发射进度计算该粒子的出现进度
+                    // 当emissionProgress == particleThreshold时，出现进度为0
+                    // 当emissionProgress == 1时，出现进度为1
+                    const progress = Math.min(1, (this.emissionProgress - particleThreshold) / (1 - particleThreshold));
+                    
+                    // 直接设置粒子的出现进度，确保与发射进度同步
+                    particle.appearProgress = progress;
+                    
+                    // 当出现进度达到1时，标记粒子为就绪状态
+                    if (progress >= 1) {
+                        particle.isReady = true;
+                        particle.isVisible = true;
+                    } else {
+                        // 根据出现进度决定粒子可见性，当进度超过0.5时显示
+                        if (progress > 0.5) {
+                            particle.isVisible = true;
+                        } else {
+                            particle.isVisible = false;
+                        }
+                    }
+                } else {
+                    // 未达到触发阈值，粒子不可见
+                    particle.isVisible = false;
+                    particle.appearProgress = 0;
+                }
+            }
+            
+            // 如果发射进度达到1，结束发射动画
+            if (this.emissionProgress >= 1) {
+                this.isEmitting = false;
+                // 确保所有粒子都可见和就绪
+                this.particles.forEach(particle => {
+                    particle.isVisible = true;
+                    particle.isReady = true;
+                    particle.appearProgress = 1;
+                });
+                // 开始连接线条动画
+                this.isConnecting = true;
+                // 生成连接对
+                this.generateConnections();
+            }
+        }
+        
+        // 连接线条动画
+        if (this.isConnecting) {
+            // 更新连接进度
+            this.connectionProgress += this.connectionSpeed;
+            
+            // 如果连接进度超过1，结束连接并触发文字动画
+            if (this.connectionProgress >= 1) {
+                this.connectionProgress = 1;
+                this.isConnecting = false;
+                
+                // 连接线条动画完成，触发文字动画
+                setTimeout(() => {
+                    startTextAnimation();
+                }, 500); // 延迟500ms，让连接线条稳定显示后再开始文字动画
+            }
+        }
+        
         this.rotateParticles();
         this.projectParticles();
         this.drawParticles();
         
         requestAnimationFrame(() => this.animate());
+    }
+    
+    // 生成粒子连接对
+    generateConnections() {
+        this.connections = [];
+        this.connectedPairs.clear();
+        
+        // 为每个可见粒子找到最近的可见邻居并生成连接
+        for (let i = 0; i < this.particles.length; i += Math.floor(this.particles.length / this.lineCount)) {
+            const p1 = this.particles[i];
+            
+            // 只处理可见的粒子
+            if (p1.isVisible && p1.screenSize > 0) {
+                let closestDistance = Infinity;
+                let closestParticle = null;
+                let closestIndex = -1;
+                
+                // 查找最近的可见粒子
+                for (let j = 0; j < this.particles.length; j++) {
+                    if (i !== j) {
+                        const p2 = this.particles[j];
+                        
+                        // 只处理可见的粒子
+                        if (p2.isVisible && p2.screenSize > 0) {
+                            const dx = p1.x - p2.x;
+                            const dy = p1.y - p2.y;
+                            const dz = p1.z - p2.z;
+                            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                            
+                            // 生成唯一的连接ID，避免重复
+                            const pairId1 = `${i}-${j}`;
+                            const pairId2 = `${j}-${i}`;
+                            
+                            if (distance < closestDistance && distance < this.maxLineDistance && 
+                                !this.connectedPairs.has(pairId1) && !this.connectedPairs.has(pairId2)) {
+                                closestDistance = distance;
+                                closestParticle = p2;
+                                closestIndex = j;
+                            }
+                        }
+                    }
+                }
+                
+                // 如果找到了最近的粒子，添加连接
+                if (closestParticle) {
+                    const pairId = `${i}-${closestIndex}`;
+                    this.connectedPairs.add(pairId);
+                    
+                    this.connections.push({
+                        p1: p1,
+                        p2: closestParticle,
+                        distance: closestDistance,
+                        startX: p1.screenX,
+                        startY: p1.screenY,
+                        endX: closestParticle.screenX,
+                        endY: closestParticle.screenY
+                    });
+                }
+            }
+        }
+    }
+    
+    // 缓动函数：先加速后减速
+    easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     }
     
     // 开始地球放大和进入内部效果
@@ -216,9 +545,13 @@ window.addEventListener('DOMContentLoaded', () => {
     // 初始化3D地球
     earthInstance = new ParticleEarth();
     
-    // 初始化文字动画
-    initTextAnimation();
+    // 文字动画将在扫描和连接线条动画完成后通过回调触发
 });
+
+// 当扫描和连接线条动画完成后，调用此函数触发文字动画
+function startTextAnimation() {
+    initTextAnimation();
+}
 
 // 文字逐个出现并向左推的动画
 function initTextAnimation() {
@@ -348,7 +681,7 @@ function handleTextClick() {
                     // 进度线条动画结束后，显示新文字
                     showNewText();
                 });
-            }, chars.length * 80 + 3500); // 地球完全穿过之后执行进度线条动画
+            }, chars.length * 80 + 150); // 地球完全穿过之后执行进度线条动画
         }, 500); // 等待线条消失动画完成
     }
 }
