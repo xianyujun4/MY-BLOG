@@ -658,18 +658,20 @@ function showNewText() {
                             textContainer.appendChild(newText);
                             expandedBox.appendChild(textContainer);
                             
-                            // 触发动画
+                            // 触发动画 - 线条和文字同步进行，时长0.3秒
                             setTimeout(() => {
+                                // 设置动画时长为0.3秒
+                                newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                line.style.transition = 'width 0.3s ease';
+                                
+                                // 同时触发文字飞入和线条生长动画
                                 newText.style.opacity = '1';
                                 newText.style.transform = 'translateX(0)';
                                 
-                                // 文字飞入后触发线条生长动画
-                                setTimeout(() => {
-                                    // 获取文字宽度并设置线条宽度
-                                    const textWidth = newText.offsetWidth;
-                                    line.style.width = `${textWidth}px`;
-                                }, 1000); // 与文字飞入动画时长一致
-                            }, 600); // 放大动画结束后开始文字飞入（放大动画持续500ms）
+                                // 获取文字宽度并设置线条宽度
+                                const textWidth = newText.offsetWidth;
+                                line.style.width = `${textWidth}px`;
+                            }, 600); // 放大动画结束后开始（放大动画持续500ms）
                         }
                         
                         // 设置初始样式，与原框位置一致，包括边框
@@ -730,47 +732,44 @@ function showNewText() {
                             const line = expandedBox.querySelector('.new-text-line');
                             
                             if (textContainer && newText && line) {
-                                // 1. 线条从右往左缩小动画
-                                line.style.transition = 'width 0.8s ease';
+                                // 1. 线条和文字同步动画，时长0.3秒
+                                line.style.transition = 'width 0.3s ease';
                                 line.style.width = '0';
                                 line.style.transformOrigin = 'right center';
                                 
-                                // 2. 线条缩小完成后，文字从左侧飞出
+                                newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                newText.style.opacity = '0';
+                                newText.style.transform = 'translateX(-100%)';
+                                
+                                // 2. 动画完成后，执行原本的框缩小动画
                                 setTimeout(() => {
-                                    newText.style.transition = 'opacity 0.5s ease, transform 1s ease-in';
-                                    newText.style.opacity = '0';
-                                    newText.style.transform = 'translateX(-100%)';
+                                    // 开始缩小动画，与放大逻辑一致
+                                    expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
                                     
-                                    // 3. 文字飞出完成后，执行原本的框缩小动画
+                                    // 强制浏览器重排，确保动画能正确触发
+                                    expandedBox.offsetHeight;
+                                    
+                                    // 开始缩小动画
                                     setTimeout(() => {
-                                        // 开始缩小动画，与放大逻辑一致
-                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        expandedBox.style.top = `${rect.top}px`;
+                                        expandedBox.style.left = `${rect.left}px`;
+                                        expandedBox.style.width = `${rect.width}px`;
+                                        expandedBox.style.height = `${rect.height}px`;
+                                        // 缩小过程中保持边框可见，不立即设置opacity
+                                    }, 10);
+                                    
+                                    // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                    setTimeout(() => {
+                                        expandedBox.style.opacity = '0';
                                         
-                                        // 强制浏览器重排，确保动画能正确触发
-                                        expandedBox.offsetHeight;
-                                        
-                                        // 开始缩小动画
+                                        // 延迟移除元素，确保透明度动画完成
                                         setTimeout(() => {
-                                            expandedBox.style.top = `${rect.top}px`;
-                                            expandedBox.style.left = `${rect.left}px`;
-                                            expandedBox.style.width = `${rect.width}px`;
-                                            expandedBox.style.height = `${rect.height}px`;
-                                            // 缩小过程中保持边框可见，不立即设置opacity
-                                        }, 10);
-                                        
-                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
-                                        setTimeout(() => {
-                                            expandedBox.style.opacity = '0';
-                                            
-                                            // 延迟移除元素，确保透明度动画完成
-                                            setTimeout(() => {
-                                                if (expandedBox.parentNode) {
-                                                    expandedBox.parentNode.removeChild(expandedBox);
-                                                }
-                                            }, 100);
-                                        }, 500);
-                                    }, 1000); // 文字飞出动画时长1秒
-                                }, 800); // 线条缩小动画时长0.8秒
+                                            if (expandedBox.parentNode) {
+                                                expandedBox.parentNode.removeChild(expandedBox);
+                                            }
+                                        }, 100);
+                                    }, 500);
+                                }, 300); // 线条和文字动画时长0.3秒
                             } else {
                                 // 如果没有新文字元素，直接执行原本的缩小动画
                                 // 开始缩小动画，与放大逻辑一致
@@ -788,7 +787,7 @@ function showNewText() {
                                     // 缩小过程中保持边框可见，不立即设置opacity
                                 }, 10);
                                 
-                                // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                // 缩小动画结束后（0.1秒），设置透明度并移除元素
                                 setTimeout(() => {
                                     expandedBox.style.opacity = '0';
                                     
@@ -798,7 +797,7 @@ function showNewText() {
                                             expandedBox.parentNode.removeChild(expandedBox);
                                         }
                                     }, 100);
-                                }, 500);
+                                }, 100);
                             }
                         };
                         

@@ -198,12 +198,32 @@ body {
         width: 25vw !important;
         height: 25vw !important;
     }
+    
+    /* 手机端进度条数字大小调整 */
+    .percentage-text {
+        font-size: 1.2rem !important;
+    }
+    
+    /* 手机端WELCOME线条粗细调整 */
+    .welcome-line {
+        height: 1px !important;
+    }
 }
 
 @media (max-width: 480px) {
     #transition-circle {
         width: 50vw !important;
         height: 50vw !important;
+    }
+    
+    /* 小屏手机进度条数字大小进一步调整 */
+    .percentage-text {
+        font-size: 1rem !important;
+    }
+    
+    /* 小屏手机WELCOME线条粗细进一步调整 */
+    .welcome-line {
+        height: 1px !important;
     }
 }
 
