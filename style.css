@@ -62,6 +62,14 @@ body {
     text-overflow: ellipsis;
 }
 
+/* 电脑端文字大小限制 */
+@media (min-width: 768px) {
+    .center-text h1 {
+        font-size: 2.0rem;
+        letter-spacing: 4px;
+    }
+}
+
 /* 单个字符样式 */
 .char {
     display: inline-block;
@@ -423,61 +431,90 @@ body {
 
 /* 主标题样式 */
 .main-title {
-    font-size: 4rem;
+    font-size: 7vw;
     font-weight: 700;
     color: var(--text-color);
     margin: 0;
     font-family: 'Courier New', monospace;
     text-transform: uppercase;
-    letter-spacing: 12px;
+    letter-spacing: 0.6vw;
     position: relative;
     z-index: 2;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* 额外文字容器样式 */
 .additional-text {
     display: flex;
     justify-content: center;
-    gap: 40px;
-    margin-top: 30px;
+    gap: 4vw;
+    margin-top: 3vh;
     position: relative;
     z-index: 2;
+    flex-wrap: wrap;
 }
 
 /* 极简文字样式 */
 .minimal-text {
-    font-size: 1rem;
+    font-size: 2vw;
     font-weight: 300;
     color: rgba(0, 0, 0, 0.6);
     margin: 0;
     font-family: 'Courier New', monospace;
-    letter-spacing: 3px;
+    letter-spacing: 0.2vw;
     text-transform: uppercase;
+}
+
+/* 电脑端文字大小限制 */
+@media (min-width: 768px) {
+    .main-title {
+        font-size: 4rem;
+        letter-spacing: 12px;
+    }
+    
+    .minimal-text {
+        font-size: 1rem;
+        letter-spacing: 3px;
+    }
+    
+    .additional-text {
+        gap: 40px;
+        margin-top: 30px;
+    }
 }
 
 /* 框容器样式 */
 .boxes-container {
     display: flex;
     justify-content: center;
-    gap: 2vw; /* 相对单位，根据屏幕宽度调整间距 */
-    margin-top: 5vh; /* 相对单位，根据屏幕高度调整垂直间距 */
+    gap: 1.5vw; /* 减小间距，确保一行能容纳 */
+    margin-top: 5vh;
     position: relative;
     z-index: 2;
-    flex-wrap: wrap; /* 自动换行，适配各种屏幕 */
-    max-width: 90%;
+    flex-wrap: nowrap; /* 禁止换行，确保一行排开 */
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    /* 确保容器居中，不影响十字形符号位置 */
-    top: 0;
-    left: 0;
-    transform: none;
+    overflow-x: auto;
+    /* 添加滚动条样式 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* 隐藏滚动条 */
+.boxes-container::-webkit-scrollbar {
+    display: none;
 }
 
 /* 单个框样式 */
 .box {
-    width: 18vw; /* 相对单位，根据屏幕宽度调整宽度 */
-    height: 12vw; /* 相对单位，根据屏幕宽度调整高度 */
+    width: 15vw;
+    height: 10vw;
+    min-width: 80px;
     max-width: 120px;
+    min-height: 60px;
     max-height: 80px;
     border: 1px solid rgba(0, 0, 0, 0.2);
     background-color: rgba(255, 255, 255, 0.5);
@@ -489,6 +526,39 @@ body {
     transform: scale(0);
     transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
+}
+
+/* 手机端适配 - 确保一行排开 */
+@media (max-width: 768px) {
+    .boxes-container {
+        gap: 10px; /* 固定间距，确保手机端一行能容纳 */
+        padding: 0 10px;
+    }
+    
+    .box {
+        width: 22vw;
+        height: 15vw;
+        min-width: 60px;
+        max-width: 100px;
+        min-height: 50px;
+        max-height: 70px;
+    }
+}
+
+/* 小屏手机适配 */
+@media (max-width: 480px) {
+    .boxes-container {
+        gap: 8px;
+    }
+    
+    .box {
+        width: 23vw;
+        height: 16vw;
+        min-width: 55px;
+        max-width: 80px;
+        min-height: 45px;
+        max-height: 60px;
+    }
 }
 
 /* 框的内部装饰 */
