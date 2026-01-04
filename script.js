@@ -1096,8 +1096,23 @@ function showNewText(diamond) {
                                     .then(notes => {
                                         // 按创建时间由近到远排序（最新的在前面）
                                         notes.sort((a, b) => {
-                                            // 比较日期字符串，YYYY-MM-DD格式可以直接比较
-                                            return new Date(b.date) - new Date(a.date);
+                                            // 转换'年-月-日-时:分'格式为ISO格式，便于Date对象解析
+                                            const formatDate = (dateStr) => {
+                                                // 处理格式：YYYY-MM-DD-HH:mm
+                                                if (dateStr.includes('-') && dateStr.includes(':')) {
+                                                    // 将YYYY-MM-DD-HH:mm转换为YYYY-MM-DDTHH:mm
+                                                    return dateStr.replace(/-(\d{2}):(\d{2})$/, 'T$1:$2');
+                                                } else if (dateStr.includes('-')) {
+                                                    // 处理旧格式：YYYY-MM-DD
+                                                    return dateStr;
+                                                }
+                                                return dateStr; // 保持其他格式不变
+                                            };
+                                            
+                                            const dateA = new Date(formatDate(a.date));
+                                            const dateB = new Date(formatDate(b.date));
+                                            
+                                            return dateB - dateA; // 最新的在前
                                         });
                                         
                                         // 渲染笔记
