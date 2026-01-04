@@ -303,6 +303,47 @@ body {
     pointer-events: none;
 }
 
+/* 手机端调整 */
+@media (max-width: 768px) {
+    .diamond {
+        /* 缩小菱形初始大小 */
+        width: 15px;
+        height: 15px;
+        /* 减小菱形边框粗细 */
+        border-width: 1px;
+    }
+    
+    /* 减小进度线条粗细 */
+    .progress-line {
+        height: 1px !important;
+    }
+    
+    /* 减小百分比文字大小 */
+    .percentage-text {
+        font-size: 1.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .diamond {
+        /* 进一步缩小菱形初始大小 */
+        width: 12px;
+        height: 12px;
+        /* 进一步减小菱形边框粗细 */
+        border-width: 1px;
+    }
+    
+    /* 进一步减小进度线条粗细 */
+    .progress-line {
+        height: 1px !important;
+    }
+    
+    /* 进一步减小百分比文字大小 */
+    .percentage-text {
+        font-size: 1.2rem !important;
+    }
+}
+
 .diamond.visible {
     opacity: 1;
 }
