@@ -764,8 +764,10 @@ function showProgressAnimation(callback) {
         // 更新百分比文字内容
         percentageElement.textContent = Math.round(currentProgress) + '%';
         
-        // 更新线条宽度
+        // 更新线条宽度，移除过渡效果，让进度条实时更新
         const lineWidth = (currentProgress / 2) + '%';
+        leftLine.style.transition = 'none'; // 移除过渡效果
+        rightLine.style.transition = 'none'; // 移除过渡效果
         leftLine.style.width = lineWidth;
         rightLine.style.width = lineWidth;
         
