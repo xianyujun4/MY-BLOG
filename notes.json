@@ -1,47 +1,7 @@
 [
   {
-    "title": "TEST1",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST2",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST3",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST4",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST5",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST6",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST7",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST8",
-    "content": "测试内容",
-    "date": "2026-01-04"
-  },
-  {
-    "title": "TEST9",
-    "content": "测试内容",
+    "title": "立项至今感受",
+    "content": "这个博客网站100%由AI开发，我只作为规划设计参与了开发。说实话，AI编程真的不错，好用。",
     "date": "2026-01-04"
   }
 ]
