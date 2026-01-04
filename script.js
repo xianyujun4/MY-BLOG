@@ -1149,6 +1149,147 @@ function showNewText(diamond) {
                                                     card.style.transform = 'translateY(0)';
                                                 }, cardIndex * 200); // 每个卡片间隔200ms出现
                                             });
+                                            
+                                            // 为每个笔记卡片添加点击事件，展开详情页
+                                            noteCards.forEach((card, index) => {
+                                                card.addEventListener('click', () => {
+                                                    const note = notes[index];
+                                                    
+                                                    // 创建笔记详情容器
+                                                    const noteDetailContainer = document.createElement('div');
+                                                    noteDetailContainer.className = 'note-detail-container';
+                                                    noteDetailContainer.style.position = 'fixed';
+                                                    noteDetailContainer.style.top = '0';
+                                                    noteDetailContainer.style.left = '0';
+                                                    noteDetailContainer.style.width = '100%';
+                                                    noteDetailContainer.style.height = '100%';
+                                                    noteDetailContainer.style.backgroundColor = 'white';
+                                                    noteDetailContainer.style.zIndex = '999999';
+                                                    noteDetailContainer.style.overflow = 'auto';
+                                                    noteDetailContainer.style.opacity = '0';
+                                                    noteDetailContainer.style.transform = 'scale(0.95)';
+                                                    noteDetailContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                                    
+                                                    // 设置详情页内容
+                                                    noteDetailContainer.innerHTML = `
+                                                        <div style="max-width: 800px; margin: 80px auto; padding: 0 20px;">
+                                                            <div style="margin-bottom: 40px;">
+                                                                <h1 style="font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 700; color: var(--text-color); margin-bottom: 20px; line-height: 1.4;">${note.title}</h1>
+                                                                <div style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
+                                                                    <span>${note.date}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 30px;">
+                                                                <p style="font-family: 'Courier New', monospace; font-size: 1.1rem; color: #333; line-height: 1.8;">${note.content}</p>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                    
+                                                    document.body.appendChild(noteDetailContainer);
+                                                    
+                                                    // 触发动画
+                                                    setTimeout(() => {
+                                                        noteDetailContainer.style.opacity = '1';
+                                                        noteDetailContainer.style.transform = 'scale(1)';
+                                                    }, 10);
+                                                    
+                                                    // 点击空白处关闭
+                                                    noteDetailContainer.addEventListener('click', (e) => {
+                                                        if (e.target === noteDetailContainer) {
+                                                            noteDetailContainer.style.opacity = '0';
+                                                            noteDetailContainer.style.transform = 'scale(0.95)';
+                                                            
+                                                            setTimeout(() => {
+                                                                document.body.removeChild(noteDetailContainer);
+                                                            }, 500);
+                                                        }
+                                                    });
+                                                    
+                                                    // 添加点击任意位置关闭（除了内容区域）
+                                                    const detailContent = noteDetailContainer.querySelector('div');
+                                                    detailContent.addEventListener('click', (e) => {
+                                                        e.stopPropagation(); // 阻止事件冒泡到容器
+                                                    });
+                                                    
+                                                    // 保存全局ESC事件监听器引用，用于临时移除和恢复
+                                                    let globalEscKeyHandler = null;
+                                                    
+                                                    // 获取并保存预览页的ESC事件监听器
+                                                    let previewEscKeyHandler = null;
+                                                    
+                                                    // 查找并保存预览页的ESC事件监听器
+                                                    // 我们需要暂时移除预览页的ESC事件监听器，避免冲突
+                                                    // 这里我们使用一个技巧：先移除所有ESC事件监听器，然后只添加我们自己的
+                                                    const originalAddEventListener = document.addEventListener;
+                                                    let allEscHandlers = [];
+                                                    
+                                                    // 暂时替换addEventListener，捕获所有ESC事件监听器
+                                                    document.addEventListener = function(type, listener, options) {
+                                                        if (type === 'keydown') {
+                                                            allEscHandlers.push({ listener, options });
+                                                        }
+                                                        return originalAddEventListener.call(this, type, listener, options);
+                                                    };
+                                                    
+                                                    // 添加 ESC 键关闭功能
+                                                    const escKeyHandler = (e) => {
+                                                        if (e.key === 'Escape') {
+                                                            // 完全阻止事件传播和默认行为
+                                                            e.stopPropagation();
+                                                            e.stopImmediatePropagation();
+                                                            e.preventDefault();
+                                                            
+                                                            noteDetailContainer.style.opacity = '0';
+                                                            noteDetailContainer.style.transform = 'scale(0.95)';
+                                                            
+                                                            setTimeout(() => {
+                                                                // 移除详情页的ESC事件监听器
+                                                                document.removeEventListener('keydown', escKeyHandler, true);
+                                                                
+                                                                // 重新添加所有原来的ESC事件监听器
+                                                                allEscHandlers.forEach(({ listener, options }) => {
+                                                                    originalAddEventListener.call(document, 'keydown', listener, options);
+                                                                });
+                                                                
+                                                                // 移除详情页元素
+                                                                document.body.removeChild(noteDetailContainer);
+                                                            }, 500);
+                                                        }
+                                                    };
+                                                    
+                                                    // 恢复原始的addEventListener方法
+                                                    document.addEventListener = originalAddEventListener;
+                                                    
+                                                    // 移除所有现有的ESC事件监听器
+                                                    allEscHandlers.forEach(({ listener, options }) => {
+                                                        document.removeEventListener('keydown', listener, options);
+                                                    });
+                                                    
+                                                    // 添加详情页的ESC事件监听器
+                                                    document.addEventListener('keydown', escKeyHandler, true);
+                                                    
+                                                    // 确保移除事件监听器
+                                                    const removeDetailContainer = () => {
+                                                        // 移除详情页的ESC事件监听器
+                                                        document.removeEventListener('keydown', escKeyHandler, true);
+                                                        
+                                                        // 重新添加所有原来的ESC事件监听器
+                                                        allEscHandlers.forEach(({ listener, options }) => {
+                                                            originalAddEventListener.call(document, 'keydown', listener, options);
+                                                        });
+                                                        
+                                                        // 移除详情页元素
+                                                        document.body.removeChild(noteDetailContainer);
+                                                    };
+                                                    
+                                                    // 添加自动清理机制
+                                                    noteDetailContainer.addEventListener('transitionend', (e) => {
+                                                        if (e.propertyName === 'opacity' && noteDetailContainer.style.opacity === '0') {
+                                                            removeDetailContainer();
+                                                        }
+                                                    });
+                                                });
+                                            });
                                         }, 1000); // 延迟1秒，让标题和线条动画先完成
                                     })
                                     .catch(error => {
@@ -1183,59 +1324,174 @@ function showNewText(diamond) {
                                         }, 1000);
                                     });
                             } else {
-                                // 其他框保持原有行为
-                                // 创建新的文字容器
-                                const textContainer = document.createElement('div');
-                                textContainer.className = 'new-text-container';
-                                textContainer.style.position = 'absolute';
-                                textContainer.style.top = '50px'; // 与顶部保持间距
-                                textContainer.style.left = '50px'; // 与左部保持间距
-                                textContainer.style.zIndex = '99999';
-                                textContainer.style.overflow = 'hidden';
-                                
-                                // 创建新文字元素
-                                const newText = document.createElement('div');
-                                newText.className = 'new-text';
-                                newText.textContent = boxText.textContent;
-                                newText.style.fontFamily = 'Courier New, monospace';
-                                newText.style.fontSize = '2rem';
-                                newText.style.fontWeight = '700';
-                                newText.style.color = 'var(--text-color)';
-                                newText.style.textTransform = 'uppercase';
-                                newText.style.letterSpacing = '8px';
-                                newText.style.opacity = '0';
-                                newText.style.transform = 'translateX(-100%)';
-                                newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
-                                
-                                // 创建线条元素
-                                const line = document.createElement('div');
-                                line.className = 'new-text-line';
-                                line.style.height = '2px';
-                                line.style.backgroundColor = 'var(--text-color)';
-                                line.style.width = '0';
-                                line.style.marginBottom = '10px';
-                                line.style.transformOrigin = 'left center';
-                                line.style.transition = 'width 0.8s ease 1s'; // 延迟1秒开始，与文字飞入动画衔接
-                                
-                                // 组装元素
-                                textContainer.appendChild(line);
-                                textContainer.appendChild(newText);
-                                expandedBox.appendChild(textContainer);
-                                
-                                // 触发动画 - 线条和文字同步进行，时长0.3秒
-                                setTimeout(() => {
-                                    // 设置动画时长为0.3秒
-                                    newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
-                                    line.style.transition = 'width 0.3s ease';
+                                // 第四个框（关于）：特殊样式
+                                if (index === 3) {
+                                    // 创建新的文字容器
+                                    const textContainer = document.createElement('div');
+                                    textContainer.className = 'new-text-container';
+                                    textContainer.style.position = 'absolute';
+                                    textContainer.style.top = '50px'; // 与顶部保持间距
+                                    textContainer.style.left = '50px'; // 与左部保持间距
+                                    textContainer.style.zIndex = '99999';
+                                    textContainer.style.overflow = 'hidden';
                                     
-                                    // 同时触发文字飞入和线条生长动画
-                                    newText.style.opacity = '1';
-                                    newText.style.transform = 'translateX(0)';
+                                    // 创建新文字元素
+                                    const newText = document.createElement('div');
+                                    newText.className = 'new-text';
+                                    newText.textContent = boxText.textContent;
+                                    newText.style.fontFamily = 'Courier New, monospace';
+                                    newText.style.fontSize = '2rem';
+                                    newText.style.fontWeight = '700';
+                                    newText.style.color = 'var(--text-color)';
+                                    newText.style.textTransform = 'uppercase';
+                                    newText.style.letterSpacing = '8px';
+                                    newText.style.opacity = '0';
+                                    newText.style.transform = 'translateX(-100%)';
+                                    newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
                                     
-                                    // 获取文字宽度并设置线条宽度
-                                    const textWidth = newText.offsetWidth;
-                                    line.style.width = `${textWidth}px`;
-                                }, 600); // 放大动画结束后开始（放大动画持续500ms）
+                                    // 组装文字元素
+                                    textContainer.appendChild(newText);
+                                    expandedBox.appendChild(textContainer);
+                                    
+                                    // 触发文字飞入动画
+                                    setTimeout(() => {
+                                        newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                        newText.style.opacity = '1';
+                                        newText.style.transform = 'translateX(0)';
+                                    }, 600);
+                                    
+                                    // 创建关于内容容器
+                                    const aboutContainer = document.createElement('div');
+                                    aboutContainer.className = 'about-container';
+                                    aboutContainer.style.position = 'absolute';
+                                    aboutContainer.style.top = '120px';
+                                    aboutContainer.style.left = '50px';
+                                    aboutContainer.style.right = '50px';
+                                    aboutContainer.style.bottom = '50px';
+                                    aboutContainer.style.zIndex = '99998';
+                                    aboutContainer.style.overflow = 'auto';
+                                    aboutContainer.style.fontFamily = 'Courier New, monospace';
+                                    aboutContainer.style.opacity = '0';
+                                    aboutContainer.style.transform = 'translateY(20px)';
+                                    aboutContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                    
+                                    // 关于内容HTML
+                                    aboutContainer.innerHTML = `
+                                        <!-- 一言部分 -->
+                                        <section class="hitokoto-section" style="margin-bottom: 60px; text-align: center;">
+                                            <div class="hitokoto" style="font-size: 1.2rem; font-style: italic; color: #666; line-height: 1.8;">想用AB键去改变未来</div>
+                                        </section>
+                                        
+                                        <!-- 灰色分割线 -->
+                                        <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0 auto 60px; max-width: 800px;"></div>
+                                        
+                                        <!-- 简介部分 -->
+                                        <section class="intro-section" style="margin-bottom: 60px; text-align: center;">
+                                            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 30px; color: var(--text-color);">简介</h3>
+                                            <div class="avatar-content" style="display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 40px; flex-wrap: wrap;">
+                                                <!-- 左侧头像 -->
+                                                <div class="avatar-container" style="flex-shrink: 0;">
+                                                    <img src="https://p3-pc-sign.douyinpic.com/aweme-avatar/tos-cn-i-c9aec8xkvj_e2d3d20ddd4c4e3db22eb5d5bcc75b14~tplv-8yspqt5zfm-300x300.webp?lk3s=93de098e&x-expires=1767679200&x-signature=%2FcfKt%2B%2FMudHbRPtQZe9SG9xefe0%3D&from=2480802190&s=profile&se=false&sc=avatar&l=202601041431441732686B9F282B93D889" 
+                                                        alt="头像" 
+                                                        style="width: 200px; height: 200px; border-radius: 8px; object-fit: cover; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);">
+                                                </div>
+                                                
+                                                <!-- 右侧分点内容 -->
+                                                <div class="points-container" style="max-width: 500px; text-align: left;">
+                                                    <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 06年,男,浙江人</div>
+                                                    <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 目前就读于杭州某大学计算机相关专业</div>
+                                                    <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 爱好涉猎广泛</div>
+                                                    <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 最大的梦想是转生异世界</div>
+                                                    <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 有AI不用就和放着工具不动有什么区别!</div>
+                                                </div>
+                                            </div>
+                                        </section>
+                                        
+                                        <!-- 灰色分割线 -->
+                                        <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0 auto 60px; max-width: 800px;"></div>
+                                        
+                                        <!-- 关于网站部分 -->
+                                        <section class="website-section" style="margin-bottom: 60px; text-align: center;">
+                                            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 30px; color: var(--text-color);">关于网站</h3>
+                                            <div class="website-content" style="max-width: 800px; margin: 0 auto; text-align: left;">
+                                                <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 本网站采用100%的AI构筑</div>
+                                                <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 网站为个人博客网站,已在Github开源</div>
+                                            </div>
+                                        </section>
+                                        
+                                        <!-- 灰色分割线 -->
+                                        <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0 auto 60px; max-width: 800px;"></div>
+                                        
+                                        <!-- 联系部分 -->
+                                        <section class="contact-section" style="text-align: center;">
+                                            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 40px; color: var(--text-color);">联系</h3>
+                                            <div class="contact-container" style="display: flex; justify-content: center; gap: 100px; flex-wrap: wrap;">
+                                                <div class="contact-item" style="min-width: 250px; padding: 20px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: rgba(255, 255, 255, 0.5); transition: all 0.3s ease; cursor: pointer;">
+                                                    <a href="https://github.com/xianyujun4" style="display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+                                                        <!-- GitHub图标 -->
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                                        </svg>
+                                                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-color);">Github</div>
+                                                    </a>
+                                                </div>
+                                                <div class="contact-item" style="min-width: 250px; padding: 20px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: rgba(255, 255, 255, 0.5); transition: all 0.3s ease; cursor: pointer;">
+                                                    <a href="mailto:xianyujun4@qq.com" style="display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; color: inherit;">
+                                                        <!-- 邮箱图标 -->
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/>
+                                                        </svg>
+                                                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-color);">邮箱</div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </section>
+                                    `;
+                                    
+                                    // 添加到放大的框中
+                                    expandedBox.appendChild(aboutContainer);
+                                    
+                                    // 触发关于内容动画
+                                    setTimeout(() => {
+                                        aboutContainer.style.opacity = '1';
+                                        aboutContainer.style.transform = 'translateY(0)';
+                                    }, 900); // 文字动画后延迟300ms
+                                } else {
+                                    // 其他框（TEST2、TEST3）：删除飞入的线条，只保留文字动画
+                                    // 创建新的文字容器
+                                    const textContainer = document.createElement('div');
+                                    textContainer.className = 'new-text-container';
+                                    textContainer.style.position = 'absolute';
+                                    textContainer.style.top = '50px'; // 与顶部保持间距
+                                    textContainer.style.left = '50px'; // 与左部保持间距
+                                    textContainer.style.zIndex = '99999';
+                                    textContainer.style.overflow = 'hidden';
+                                    
+                                    // 创建新文字元素
+                                    const newText = document.createElement('div');
+                                    newText.className = 'new-text';
+                                    newText.textContent = boxText.textContent;
+                                    newText.style.fontFamily = 'Courier New, monospace';
+                                    newText.style.fontSize = '2rem';
+                                    newText.style.fontWeight = '700';
+                                    newText.style.color = 'var(--text-color)';
+                                    newText.style.textTransform = 'uppercase';
+                                    newText.style.letterSpacing = '8px';
+                                    newText.style.opacity = '0';
+                                    newText.style.transform = 'translateX(-100%)';
+                                    newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
+                                    
+                                    // 组装元素 - 只添加文字，不添加线条
+                                    textContainer.appendChild(newText);
+                                    expandedBox.appendChild(textContainer);
+                                    
+                                    // 触发文字飞入动画
+                                    setTimeout(() => {
+                                        newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                        newText.style.opacity = '1';
+                                        newText.style.transform = 'translateX(0)';
+                                    }, 600);
+                                }
                             }
                         }
                         
@@ -1278,8 +1534,33 @@ function showNewText(diamond) {
                             box.style.background = 'none';
                         }, 500);
                         
-                        // 添加点击关闭功能
-                        const closeHandler = () => {
+                        // 添加ESC键关闭功能
+                        const escKeyHandler = (e) => {
+                            // 检查是否有笔记详情页打开，如果有则不处理（让详情页自己处理）
+                            const noteDetailContainer = document.querySelector('.note-detail-container');
+                            if (noteDetailContainer) {
+                                return; // 如果有详情页打开，不处理当前的ESC事件
+                            }
+                            
+                            if (e.key === 'Escape') {
+                                closeHandler();
+                            }
+                        };
+                        
+                        // 为当前页面添加ESC键监听
+                        document.addEventListener('keydown', escKeyHandler);
+                        
+                        // 定义关闭处理函数
+                        const closeHandler = (e) => {
+                            // 检查是否有笔记详情页打开，如果有则不处理
+                            const noteDetailContainer = document.querySelector('.note-detail-container');
+                            if (noteDetailContainer) {
+                                return;
+                            }
+                            
+                            // 移除ESC键监听
+                            document.removeEventListener('keydown', escKeyHandler);
+                            
                             // 恢复原框的样式
                             box.style.border = originalBorder || '';
                             box.style.background = originalBackground || '';
@@ -1347,53 +1628,58 @@ function showNewText(diamond) {
                                     }, 300); // 笔记消失动画时长0.3秒
                                 }, 300); // 文字和线条动画时长0.3秒
                             } else {
-                                // 其他框的原有逻辑
-                                // 获取新文字容器和线条元素
-                                const textContainer = expandedBox.querySelector('.new-text-container');
+                                // 其他框：文字先向左飞出，然后界面缩小
+                                // 获取新文字元素
                                 const newText = expandedBox.querySelector('.new-text');
-                                const line = expandedBox.querySelector('.new-text-line');
                                 
-                                if (textContainer && newText && line) {
-                                    // 1. 线条和文字同步动画，时长0.3秒
-                                    line.style.transition = 'width 0.3s ease';
-                                    line.style.width = '0';
-                                    line.style.transformOrigin = 'right center';
-                                    
+                                if (newText) {
+                                    // 1. 文字向左飞出动画，时长0.3秒
                                     newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
                                     newText.style.opacity = '0';
                                     newText.style.transform = 'translateX(-100%)';
                                     
-                                    // 2. 动画完成后，执行原本的框缩小动画
+                                    // 2. 文字动画完成后，执行内容淡出动画（如果是关于页）
                                     setTimeout(() => {
-                                        // 开始缩小动画，与放大逻辑一致
-                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        // 检查是否是关于页
+                                        const aboutContainer = expandedBox.querySelector('.about-container');
+                                        if (aboutContainer) {
+                                            aboutContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                            aboutContainer.style.opacity = '0';
+                                            aboutContainer.style.transform = 'translateY(20px)';
+                                        }
                                         
-                                        // 强制浏览器重排，确保动画能正确触发
-                                        expandedBox.offsetHeight;
-                                        
-                                        // 开始缩小动画
+                                        // 3. 内容淡出完成后，执行框缩小动画
                                         setTimeout(() => {
-                                            expandedBox.style.top = `${rect.top}px`;
-                                            expandedBox.style.left = `${rect.left}px`;
-                                            expandedBox.style.width = `${rect.width}px`;
-                                            expandedBox.style.height = `${rect.height}px`;
-                                            // 缩小过程中保持边框可见，不立即设置opacity
-                                        }, 10);
-                                        
-                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
-                                        setTimeout(() => {
-                                            expandedBox.style.opacity = '0';
+                                            // 开始缩小动画，与放大逻辑一致
+                                            expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
                                             
-                                            // 延迟移除元素，确保透明度动画完成
+                                            // 强制浏览器重排，确保动画能正确触发
+                                            expandedBox.offsetHeight;
+                                            
+                                            // 开始缩小动画
                                             setTimeout(() => {
-                                                if (expandedBox.parentNode) {
-                                                    expandedBox.parentNode.removeChild(expandedBox);
-                                                }
-                                            }, 100);
-                                        }, 500);
-                                    }, 300); // 线条和文字动画时长0.3秒
+                                                expandedBox.style.top = `${rect.top}px`;
+                                                expandedBox.style.left = `${rect.left}px`;
+                                                expandedBox.style.width = `${rect.width}px`;
+                                                expandedBox.style.height = `${rect.height}px`;
+                                                // 缩小过程中保持边框可见，不立即设置opacity
+                                            }, 10);
+                                            
+                                            // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                            setTimeout(() => {
+                                                expandedBox.style.opacity = '0';
+                                                
+                                                // 延迟移除元素，确保透明度动画完成
+                                                setTimeout(() => {
+                                                    if (expandedBox.parentNode) {
+                                                        expandedBox.parentNode.removeChild(expandedBox);
+                                                    }
+                                                }, 100);
+                                            }, 500);
+                                        }, 300); // 内容淡出动画时长0.3秒
+                                    }, 300); // 文字飞出动画时长0.3秒
                                 } else {
-                                    // 如果没有新文字元素，直接执行原本的缩小动画
+                                    // 如果没有新文字元素，直接执行缩小动画
                                     // 开始缩小动画，与放大逻辑一致
                                     expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
                                     
@@ -1409,7 +1695,7 @@ function showNewText(diamond) {
                                         // 缩小过程中保持边框可见，不立即设置opacity
                                     }, 10);
                                     
-                                    // 缩小动画结束后（0.1秒），设置透明度并移除元素
+                                    // 缩小动画结束后（0.5秒），设置透明度并移除元素
                                     setTimeout(() => {
                                         expandedBox.style.opacity = '0';
                                         
@@ -1419,7 +1705,7 @@ function showNewText(diamond) {
                                                 expandedBox.parentNode.removeChild(expandedBox);
                                             }
                                         }, 100);
-                                    }, 100);
+                                    }, 500);
                                 }
                             }
                         };
