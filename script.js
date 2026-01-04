@@ -1001,7 +1001,7 @@ function showNewText(diamond) {
                 });
                 
                 // 为所有框添加点击事件监听
-                boxes.forEach(box => {
+                boxes.forEach((box, index) => {
                     box.addEventListener('click', () => {
                         // 获取框的当前位置和尺寸
                         const rect = box.getBoundingClientRect();
@@ -1021,58 +1021,201 @@ function showNewText(diamond) {
                             // 隐藏原框内的文字
                             boxText.style.opacity = '0';
                             
-                            // 创建新的文字容器
-                            const textContainer = document.createElement('div');
-                            textContainer.className = 'new-text-container';
-                            textContainer.style.position = 'absolute';
-                            textContainer.style.top = '50px'; // 与顶部保持间距
-                            textContainer.style.left = '50px'; // 与左部保持间距
-                            textContainer.style.zIndex = '99999';
-                            textContainer.style.overflow = 'hidden';
-                            
-                            // 创建新文字元素
-                            const newText = document.createElement('div');
-                            newText.className = 'new-text';
-                            newText.textContent = boxText.textContent;
-                            newText.style.fontFamily = 'Courier New, monospace';
-                            newText.style.fontSize = '2rem';
-                            newText.style.fontWeight = '700';
-                            newText.style.color = 'var(--text-color)';
-                            newText.style.textTransform = 'uppercase';
-                            newText.style.letterSpacing = '8px';
-                            newText.style.opacity = '0';
-                            newText.style.transform = 'translateX(-100%)';
-                            newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
-                            
-                            // 创建线条元素
-                            const line = document.createElement('div');
-                            line.className = 'new-text-line';
-                            line.style.height = '2px';
-                            line.style.backgroundColor = 'var(--text-color)';
-                            line.style.width = '0';
-                            line.style.marginBottom = '10px';
-                            line.style.transformOrigin = 'left center';
-                            line.style.transition = 'width 0.8s ease 1s'; // 延迟1秒开始，与文字飞入动画衔接
-                            
-                            // 组装元素
-                            textContainer.appendChild(line);
-                            textContainer.appendChild(newText);
-                            expandedBox.appendChild(textContainer);
-                            
-                            // 触发动画 - 线条和文字同步进行，时长0.3秒
-                            setTimeout(() => {
-                                // 设置动画时长为0.3秒
-                                newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
-                                line.style.transition = 'width 0.3s ease';
+                            // 如果是第一个框，显示模块化笔记
+                            if (index === 0) {
+                                // 创建标题容器，包含左上角的线条和文字动画
+                                const titleContainer = document.createElement('div');
+                                titleContainer.style.position = 'absolute';
+                                titleContainer.style.top = '50px';
+                                titleContainer.style.left = '50px';
+                                titleContainer.style.zIndex = '99999';
+                                titleContainer.style.overflow = 'hidden';
                                 
-                                // 同时触发文字飞入和线条生长动画
-                                newText.style.opacity = '1';
-                                newText.style.transform = 'translateX(0)';
+                                // 创建文字元素
+                                const titleText = document.createElement('div');
+                                titleText.className = 'new-text';
+                                titleText.textContent = boxText.textContent;
+                                titleText.style.fontFamily = 'Courier New, monospace';
+                                titleText.style.fontSize = '2rem';
+                                titleText.style.fontWeight = '700';
+                                titleText.style.color = 'var(--text-color)';
+                                titleText.style.textTransform = 'uppercase';
+                                titleText.style.letterSpacing = '8px';
+                                titleText.style.opacity = '0';
+                                titleText.style.transform = 'translateX(-100%)';
+                                titleText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
                                 
-                                // 获取文字宽度并设置线条宽度
-                                const textWidth = newText.offsetWidth;
-                                line.style.width = `${textWidth}px`;
-                            }, 600); // 放大动画结束后开始（放大动画持续500ms）
+                                // 创建线条元素
+                                const line = document.createElement('div');
+                                line.className = 'new-text-line first-line';
+                                line.style.height = '2px';
+                                line.style.backgroundColor = 'var(--text-color)';
+                                line.style.width = '0';
+                                line.style.marginBottom = '10px';
+                                line.style.transformOrigin = 'left center';
+                                line.style.transition = 'width 0.8s ease 1s'; // 延迟1秒开始，与文字飞入动画衔接
+                                
+                                // 组装标题元素
+                                titleContainer.appendChild(line);
+                                titleContainer.appendChild(titleText);
+                                expandedBox.appendChild(titleContainer);
+                                
+                                // 触发标题和线条动画
+                                setTimeout(() => {
+                                    // 设置动画时长为0.3秒
+                                    titleText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                    line.style.transition = 'width 0.3s ease';
+                                    
+                                    // 同时触发文字飞入和线条生长动画
+                                    titleText.style.opacity = '1';
+                                    titleText.style.transform = 'translateX(0)';
+                                    
+                                    // 获取文字宽度并设置线条宽度
+                                    setTimeout(() => {
+                                        const textWidth = titleText.offsetWidth;
+                                        line.style.width = `${textWidth}px`;
+                                    }, 300);
+                                }, 600); // 放大动画结束后开始（放大动画持续500ms）
+                                
+                                // 创建笔记容器
+                                const notesContainer = document.createElement('div');
+                                notesContainer.className = 'notes-container';
+                                notesContainer.style.position = 'absolute';
+                                notesContainer.style.top = '150px';
+                                notesContainer.style.left = '50px';
+                                notesContainer.style.right = '50px';
+                                notesContainer.style.bottom = '50px';
+                                notesContainer.style.zIndex = '99999';
+                                notesContainer.style.overflow = 'auto';
+                                
+                                expandedBox.appendChild(notesContainer);
+                                
+                                // 从JSON文件读取笔记数据
+                                fetch('notes.json')
+                                    .then(response => response.json())
+                                    .then(notes => {
+                                        // 渲染笔记
+                                        notes.forEach(note => {
+                                            const noteCard = document.createElement('div');
+                                            noteCard.className = 'note-card';
+                                            noteCard.style.marginBottom = '30px';
+                                            noteCard.style.padding = '20px';
+                                            noteCard.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                                            noteCard.style.borderRadius = '8px';
+                                            noteCard.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                                            noteCard.style.backdropFilter = 'blur(1px)';
+                                            noteCard.style.opacity = '0';
+                                            noteCard.style.transform = 'translateY(20px)';
+                                            noteCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                            
+                                            noteCard.innerHTML = `
+                                                <h3 class="note-title" style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 10px; line-height: 1.4;">${note.title}</h3>
+                                                <p class="note-content" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.6;">${note.content}</p>
+                                                <div class="note-footer" style="display: flex; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #999;">
+                                                    <span class="note-date">${note.date}</span>
+                                                </div>
+                                            `;
+                                            
+                                            notesContainer.appendChild(noteCard);
+                                        });
+                                        
+                                        // 触发笔记卡片动画，逐个显示
+                                        setTimeout(() => {
+                                            const noteCards = notesContainer.querySelectorAll('.note-card');
+                                            noteCards.forEach((card, cardIndex) => {
+                                                setTimeout(() => {
+                                                    card.style.opacity = '1';
+                                                    card.style.transform = 'translateY(0)';
+                                                }, cardIndex * 200); // 每个卡片间隔200ms出现
+                                            });
+                                        }, 1000); // 延迟1秒，让标题和线条动画先完成
+                                    })
+                                    .catch(error => {
+                                        console.error('读取笔记数据失败:', error);
+                                        // 显示错误信息
+                                        const errorCard = document.createElement('div');
+                                        errorCard.className = 'note-card';
+                                        errorCard.style.marginBottom = '30px';
+                                        errorCard.style.padding = '20px';
+                                        errorCard.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                                        errorCard.style.borderRadius = '8px';
+                                        errorCard.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                                        errorCard.style.backdropFilter = 'blur(1px)';
+                                        errorCard.style.opacity = '0';
+                                        errorCard.style.transform = 'translateY(20px)';
+                                        errorCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                                        
+                                        errorCard.innerHTML = `
+                                            <h3 class="note-title" style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 10px; line-height: 1.4;">读取笔记失败</h3>
+                                            <p class="note-content" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.6;">无法加载笔记数据，请检查notes.json文件是否存在且格式正确。</p>
+                                            <div class="note-footer" style="display: flex; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #999;">
+                                                <span class="note-date">${new Date().toISOString().split('T')[0]}</span>
+                                            </div>
+                                        `;
+                                        
+                                        notesContainer.appendChild(errorCard);
+                                        
+                                        // 触发错误信息动画
+                                        setTimeout(() => {
+                                            errorCard.style.opacity = '1';
+                                            errorCard.style.transform = 'translateY(0)';
+                                        }, 1000);
+                                    });
+                            } else {
+                                // 其他框保持原有行为
+                                // 创建新的文字容器
+                                const textContainer = document.createElement('div');
+                                textContainer.className = 'new-text-container';
+                                textContainer.style.position = 'absolute';
+                                textContainer.style.top = '50px'; // 与顶部保持间距
+                                textContainer.style.left = '50px'; // 与左部保持间距
+                                textContainer.style.zIndex = '99999';
+                                textContainer.style.overflow = 'hidden';
+                                
+                                // 创建新文字元素
+                                const newText = document.createElement('div');
+                                newText.className = 'new-text';
+                                newText.textContent = boxText.textContent;
+                                newText.style.fontFamily = 'Courier New, monospace';
+                                newText.style.fontSize = '2rem';
+                                newText.style.fontWeight = '700';
+                                newText.style.color = 'var(--text-color)';
+                                newText.style.textTransform = 'uppercase';
+                                newText.style.letterSpacing = '8px';
+                                newText.style.opacity = '0';
+                                newText.style.transform = 'translateX(-100%)';
+                                newText.style.transition = 'opacity 0.5s ease, transform 1s ease-out';
+                                
+                                // 创建线条元素
+                                const line = document.createElement('div');
+                                line.className = 'new-text-line';
+                                line.style.height = '2px';
+                                line.style.backgroundColor = 'var(--text-color)';
+                                line.style.width = '0';
+                                line.style.marginBottom = '10px';
+                                line.style.transformOrigin = 'left center';
+                                line.style.transition = 'width 0.8s ease 1s'; // 延迟1秒开始，与文字飞入动画衔接
+                                
+                                // 组装元素
+                                textContainer.appendChild(line);
+                                textContainer.appendChild(newText);
+                                expandedBox.appendChild(textContainer);
+                                
+                                // 触发动画 - 线条和文字同步进行，时长0.3秒
+                                setTimeout(() => {
+                                    // 设置动画时长为0.3秒
+                                    newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                    line.style.transition = 'width 0.3s ease';
+                                    
+                                    // 同时触发文字飞入和线条生长动画
+                                    newText.style.opacity = '1';
+                                    newText.style.transform = 'translateX(0)';
+                                    
+                                    // 获取文字宽度并设置线条宽度
+                                    const textWidth = newText.offsetWidth;
+                                    line.style.width = `${textWidth}px`;
+                                }, 600); // 放大动画结束后开始（放大动画持续500ms）
+                            }
                         }
                         
                         // 设置初始样式，与原框位置一致，包括边框
@@ -1127,23 +1270,109 @@ function showNewText(diamond) {
                                 boxText.style.opacity = '1';
                             }
                             
-                            // 获取新文字容器和线条元素
-                            const textContainer = expandedBox.querySelector('.new-text-container');
-                            const newText = expandedBox.querySelector('.new-text');
+                            // 检查是否是第一个框（模块化笔记）
+                            const notesContainer = expandedBox.querySelector('.notes-container');
+                            const titleContainer = expandedBox.querySelector('.notes-container') ? expandedBox.querySelector(':scope > div:first-child') : null;
+                            const titleText = expandedBox.querySelector('.new-text');
                             const line = expandedBox.querySelector('.new-text-line');
                             
-                            if (textContainer && newText && line) {
-                                // 1. 线条和文字同步动画，时长0.3秒
+                            if (notesContainer && titleContainer && titleText && line) {
+                                // 1. 标题文字向左飞出，线条消失
+                                titleText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                titleText.style.opacity = '0';
+                                titleText.style.transform = 'translateX(-100%)';
+                                
                                 line.style.transition = 'width 0.3s ease';
                                 line.style.width = '0';
                                 line.style.transformOrigin = 'right center';
                                 
-                                newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
-                                newText.style.opacity = '0';
-                                newText.style.transform = 'translateX(-100%)';
-                                
-                                // 2. 动画完成后，执行原本的框缩小动画
+                                // 2. 文字动画完成后，模块化笔记消失
                                 setTimeout(() => {
+                                    const noteCards = notesContainer.querySelectorAll('.note-card');
+                                    noteCards.forEach((card, cardIndex) => {
+                                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                        card.style.opacity = '0';
+                                        card.style.transform = 'translateY(20px)';
+                                    });
+                                    
+                                    // 3. 笔记消失后，执行框缩小动画
+                                    setTimeout(() => {
+                                        // 开始缩小动画，与放大逻辑一致
+                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        
+                                        // 强制浏览器重排，确保动画能正确触发
+                                        expandedBox.offsetHeight;
+                                        
+                                        // 开始缩小动画
+                                        setTimeout(() => {
+                                            expandedBox.style.top = `${rect.top}px`;
+                                            expandedBox.style.left = `${rect.left}px`;
+                                            expandedBox.style.width = `${rect.width}px`;
+                                            expandedBox.style.height = `${rect.height}px`;
+                                            // 缩小过程中保持边框可见，不立即设置opacity
+                                        }, 10);
+                                        
+                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                        setTimeout(() => {
+                                            expandedBox.style.opacity = '0';
+                                            
+                                            // 延迟移除元素，确保透明度动画完成
+                                            setTimeout(() => {
+                                                if (expandedBox.parentNode) {
+                                                    expandedBox.parentNode.removeChild(expandedBox);
+                                                }
+                                            }, 100);
+                                        }, 500);
+                                    }, 300); // 笔记消失动画时长0.3秒
+                                }, 300); // 文字和线条动画时长0.3秒
+                            } else {
+                                // 其他框的原有逻辑
+                                // 获取新文字容器和线条元素
+                                const textContainer = expandedBox.querySelector('.new-text-container');
+                                const newText = expandedBox.querySelector('.new-text');
+                                const line = expandedBox.querySelector('.new-text-line');
+                                
+                                if (textContainer && newText && line) {
+                                    // 1. 线条和文字同步动画，时长0.3秒
+                                    line.style.transition = 'width 0.3s ease';
+                                    line.style.width = '0';
+                                    line.style.transformOrigin = 'right center';
+                                    
+                                    newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                    newText.style.opacity = '0';
+                                    newText.style.transform = 'translateX(-100%)';
+                                    
+                                    // 2. 动画完成后，执行原本的框缩小动画
+                                    setTimeout(() => {
+                                        // 开始缩小动画，与放大逻辑一致
+                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        
+                                        // 强制浏览器重排，确保动画能正确触发
+                                        expandedBox.offsetHeight;
+                                        
+                                        // 开始缩小动画
+                                        setTimeout(() => {
+                                            expandedBox.style.top = `${rect.top}px`;
+                                            expandedBox.style.left = `${rect.left}px`;
+                                            expandedBox.style.width = `${rect.width}px`;
+                                            expandedBox.style.height = `${rect.height}px`;
+                                            // 缩小过程中保持边框可见，不立即设置opacity
+                                        }, 10);
+                                        
+                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                        setTimeout(() => {
+                                            expandedBox.style.opacity = '0';
+                                            
+                                            // 延迟移除元素，确保透明度动画完成
+                                            setTimeout(() => {
+                                                if (expandedBox.parentNode) {
+                                                    expandedBox.parentNode.removeChild(expandedBox);
+                                                }
+                                            }, 100);
+                                        }, 500);
+                                    }, 300); // 线条和文字动画时长0.3秒
+                                } else {
+                                    // 如果没有新文字元素，直接执行原本的缩小动画
                                     // 开始缩小动画，与放大逻辑一致
                                     expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
                                     
@@ -1159,7 +1388,7 @@ function showNewText(diamond) {
                                         // 缩小过程中保持边框可见，不立即设置opacity
                                     }, 10);
                                     
-                                    // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                    // 缩小动画结束后（0.1秒），设置透明度并移除元素
                                     setTimeout(() => {
                                         expandedBox.style.opacity = '0';
                                         
@@ -1169,36 +1398,8 @@ function showNewText(diamond) {
                                                 expandedBox.parentNode.removeChild(expandedBox);
                                             }
                                         }, 100);
-                                    }, 500);
-                                }, 300); // 线条和文字动画时长0.3秒
-                            } else {
-                                // 如果没有新文字元素，直接执行原本的缩小动画
-                                // 开始缩小动画，与放大逻辑一致
-                                expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
-                                
-                                // 强制浏览器重排，确保动画能正确触发
-                                expandedBox.offsetHeight;
-                                
-                                // 开始缩小动画
-                                setTimeout(() => {
-                                    expandedBox.style.top = `${rect.top}px`;
-                                    expandedBox.style.left = `${rect.left}px`;
-                                    expandedBox.style.width = `${rect.width}px`;
-                                    expandedBox.style.height = `${rect.height}px`;
-                                    // 缩小过程中保持边框可见，不立即设置opacity
-                                }, 10);
-                                
-                                // 缩小动画结束后（0.1秒），设置透明度并移除元素
-                                setTimeout(() => {
-                                    expandedBox.style.opacity = '0';
-                                    
-                                    // 延迟移除元素，确保透明度动画完成
-                                    setTimeout(() => {
-                                        if (expandedBox.parentNode) {
-                                            expandedBox.parentNode.removeChild(expandedBox);
-                                        }
                                     }, 100);
-                                }, 100);
+                                }
                             }
                         };
                         

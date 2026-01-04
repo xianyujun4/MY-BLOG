@@ -935,6 +935,34 @@ body {
     animation: none;
 }
 
+/* 模块化笔记样式 */
+.notes-container {
+    font-family: 'Courier New', monospace;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.note-card {
+    transition: all 0.3s ease;
+}
+
+.note-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+/* 隐藏笔记滚动条但保持滚动功能 */
+.notes-container::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.notes-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
 /* 框的内部装饰线 - 调整位置，为文字腾出空间 */
 .box::before {
     content: '';
