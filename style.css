@@ -242,7 +242,7 @@ body {
     z-index: 2;
     width: 100%;
     height: 2px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* 进度线条样式 */
@@ -267,23 +267,137 @@ body {
     transform-origin: right center;
 }
 
-/* 百分比数字样式 */
+/* 百分比数字样式 - 移动到线条上方 */
 .percentage-text {
     position: absolute;
-    top: 50%;
+    top: 50%; /* 移动到父元素的中心 */
     left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3;
+    transform: translate(-50%, -150%); /* 水平居中，向上移动150%的自身高度 */
+    z-index: 5; /* 提高z-index，确保在最上层 */
     font-size: 2rem;
     font-weight: 700;
     color: #333333;
     font-family: 'Courier New', monospace;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none; /* 确保不影响点击事件 */
 }
 
 .percentage-text.visible {
     opacity: 1;
+}
+
+/* 空心正菱形样式 */
+.diamond {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333333;
+    background-color: transparent;
+    z-index: 10;
+    transition: all 1s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.diamond.visible {
+    opacity: 1;
+}
+
+/* 确保放大后的菱形保持可见 */
+.diamond.expand {
+    opacity: 1 !important;
+    z-index: 10 !important;
+    background-color: transparent !important;
+}
+
+/* 菱形涟漪扩散效果 - 保持正方形，扩散到超出主菱形 */
+@keyframes diamondRipple {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 2px;
+    }
+    100% {
+        width: 120vmin;
+        height: 120vmin;
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 1px;
+    }
+}
+
+/* 主菱形动画 - 保持正方形，刚好撑到屏幕最小两边 */
+@keyframes diamondMain {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 2px;
+    }
+    100% {
+        width: 100vmin;
+        height: 100vmin;
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 1px;
+        background-color: transparent;
+    }
+}
+
+.diamond.expand {
+    animation: diamondMain 1s ease forwards;
+}
+
+/* 菱形消失动画 - 继续扩大直到看不见 */
+@keyframes diamondDisappear {
+    0% {
+        width: 100vmin;
+        height: 100vmin;
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 1px;
+        z-index: 10 !important;
+    }
+    100% {
+        width: 300vmin;
+        height: 300vmin;
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-width: 1px;
+        z-index: 10 !important;
+    }
+}
+
+.diamond.disappear {
+    animation: diamondDisappear 1s ease forwards !important;
+    z-index: 10 !important;
+    opacity: 1 !important;
+}
+
+/* 涟漪虚像样式 */
+.diamond-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333333;
+    background-color: transparent;
+    z-index: 3;
+    opacity: 0;
+}
+
+/* 涟漪动画类 */
+.ripple-animation {
+    animation: diamondRipple 2s ease-out infinite;
 }
 
 /* 主页面样式 */

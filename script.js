@@ -361,6 +361,13 @@ class ParticleEarth {
                 this.alpha = 0;
                 // 设置isVisible为false，停止渲染地球
                 this.isVisible = false;
+                
+                // 地球完全消失，触发回调函数
+                if (this.onEarthDisappeared) {
+                    this.onEarthDisappeared();
+                    // 清空回调，避免重复触发
+                    this.onEarthDisappeared = null;
+                }
             }
         }
         
@@ -516,7 +523,7 @@ class ParticleEarth {
     }
     
     // 开始地球放大和进入内部效果
-    startScaling() {
+    startScaling(callback) {
         this.isScaling = true;
         this.isEntering = true; // 正在进入地球内部
         this.isExiting = false; // 尚未推出地球
@@ -527,6 +534,9 @@ class ParticleEarth {
         this.enterDepth = 50; // 进入地球内部的最小深度
         this.exitDepth = 800; // 退出地球后的深度
         this.isVisible = true; // 地球是否可见
+        
+        // 保存回调函数，在地球完全消失时触发
+        this.onEarthDisappeared = callback;
     }
     
     // 开始地球消失效果
@@ -667,21 +677,21 @@ function handleTextClick() {
             const textDisappearTime = (chars.length - 1) * 50;
             
             setTimeout(() => {
-                earthInstance.startScaling();
+                // 将showProgressAnimation作为回调函数传递给startScaling
+                // 这样地球完全消失后才会触发进度条动画
+                earthInstance.startScaling(() => {
+                    // 地球完全消失，开始进度线条动画
+                    showProgressAnimation((diamond) => {
+                        // 进度线条动画结束后，显示新文字
+                        showNewText(diamond);
+                    });
+                });
+                
                 // 移除线条元素
                 if (lineElement && lineElement.parentNode) {
                     lineElement.remove();
                 }
             }, textDisappearTime + 500); // 文字完全消失后延迟500ms
-            
-            // 地球完全穿过之后，先执行进度线条动画，然后再显示新文字
-            setTimeout(() => {
-                // 显示进度线条动画
-                showProgressAnimation(() => {
-                    // 进度线条动画结束后，显示新文字
-                    showNewText();
-                });
-            }, chars.length * 80 + 150); // 地球完全穿过之后执行进度线条动画
         }, 500); // 等待线条消失动画完成
     }
 }
@@ -707,10 +717,31 @@ function showProgressAnimation(callback) {
     const percentageElement = document.createElement('div');
     percentageElement.className = 'percentage-text';
     percentageElement.textContent = '0%';
+    // 先设置样式，再添加到容器
+    percentageElement.style.position = 'absolute';
+    percentageElement.style.top = '50%';
+    percentageElement.style.left = '50%';
+    percentageElement.style.transform = 'translate(-50%, -150%)';
+    percentageElement.style.zIndex = '5';
+    percentageElement.style.fontSize = '2rem';
+    percentageElement.style.fontWeight = '700';
+    percentageElement.style.color = '#333333';
+    percentageElement.style.fontFamily = 'Courier New, monospace';
+    percentageElement.style.opacity = '0';
+    percentageElement.style.transition = 'opacity 0.3s ease';
+    percentageElement.style.pointerEvents = 'none';
     document.body.appendChild(percentageElement);
     
-    // 显示百分比文字
-    percentageElement.classList.add('visible');
+    // 创建空心正菱形
+    const diamond = document.createElement('div');
+    diamond.className = 'diamond';
+    document.body.appendChild(diamond);
+    
+    // 显示百分比文字和菱形
+    setTimeout(() => {
+        percentageElement.style.opacity = '1';
+        diamond.classList.add('visible');
+    }, 100); // 延迟100ms显示，确保元素已添加到DOM
     
     // 动画参数
     const totalProgress = 100;
@@ -730,7 +761,7 @@ function showProgressAnimation(callback) {
             currentProgress = (elapsed / duration) * totalProgress;
         }
         
-        // 更新百分比文字
+        // 更新百分比文字内容
         percentageElement.textContent = Math.round(currentProgress) + '%';
         
         // 更新线条宽度
@@ -738,30 +769,44 @@ function showProgressAnimation(callback) {
         leftLine.style.width = lineWidth;
         rightLine.style.width = lineWidth;
         
-        // 检查动画是否完成
+        // 检查动画是否完成（进度条完全闭合）
         if (currentProgress >= totalProgress) {
-            // 移除进度线条和百分比文字
+            // 进度条完全闭合，立即移除进度条线和数字
+            // 隐藏百分比数字
+            percentageElement.style.opacity = '0';
+            
+            // 立即移除进度条容器（包含左右线条）
+            if (progressContainer.parentNode) {
+                progressContainer.parentNode.removeChild(progressContainer);
+            }
+            
+            // 1. 触发主菱形放大动画
+            diamond.classList.add('expand');
+            
+            // 3. 菱形放大动画完成后（1秒后），移除部分元素，保留主菱形
             setTimeout(() => {
-                percentageElement.classList.remove('visible');
-                setTimeout(() => {
-                    document.body.removeChild(progressContainer);
-                    document.body.removeChild(percentageElement);
-                    // 调用回调函数，显示第二段文字
-                    callback();
-                }, 300);
-            }, 300);
+                // 移除百分比文字元素
+                if (percentageElement.parentNode) {
+                    percentageElement.parentNode.removeChild(percentageElement);
+                }
+                
+                // 调用回调函数，显示第二段文字
+                callback(diamond);
+            }, 1000); // 等待菱形放大动画完成
         } else {
             // 继续动画
             requestAnimationFrame(updateAnimation);
         }
     }
     
+    // 移除了createRippleEffects函数，不再需要创建涟漪效果
+    
     // 开始动画
     requestAnimationFrame(updateAnimation);
 }
 
 // 显示新文字
-function showNewText() {
+function showNewText(diamond) {
     const textElement = document.getElementById('animated-text');
     
     // 清空现有内容
@@ -852,6 +897,13 @@ function showNewText() {
         textElement.style.pointerEvents = 'none';
         lineElement.style.opacity = '0';
         
+        // 菱形消失动画 - 继续扩大直到看不见
+        if (diamond) {
+            // 先移除expand类，再添加disappear类，确保消失动画能正确触发
+            diamond.classList.remove('expand');
+            diamond.classList.add('disappear');
+        }
+        
         // 立即创建圆形元素，添加到body中，避免center-text容器的样式限制
         const circleElement = document.createElement('div');
         circleElement.id = 'transition-circle';
@@ -881,6 +933,22 @@ function showNewText() {
         circleElement.style.width = '400px';
         circleElement.style.height = '400px';
         circleElement.style.transform = 'translate(-50%, -50%) rotate(720deg)';
+        
+        // 1秒后移除菱形元素
+        setTimeout(() => {
+            // 确保diamond元素存在并且有父节点
+            if (diamond && diamond.parentNode) {
+                diamond.parentNode.removeChild(diamond);
+            }
+        }, 1000);
+        
+        // 立即清除所有涟漪效果，包括通过JavaScript动态创建的
+        const ripples = document.querySelectorAll('.diamond-ripple, [style*="animationName: diamondRipple"]');
+        ripples.forEach(ripple => {
+            if (ripple.parentNode) {
+                ripple.parentNode.removeChild(ripple);
+            }
+        });
         
         // 1秒后开始圆形移动到shape-1位置的动画
         setTimeout(() => {
