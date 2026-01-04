@@ -1094,6 +1094,12 @@ function showNewText(diamond) {
                                 fetch('notes.json')
                                     .then(response => response.json())
                                     .then(notes => {
+                                        // 按创建时间由近到远排序（最新的在前面）
+                                        notes.sort((a, b) => {
+                                            // 比较日期字符串，YYYY-MM-DD格式可以直接比较
+                                            return new Date(b.date) - new Date(a.date);
+                                        });
+                                        
                                         // 渲染笔记
                                         notes.forEach(note => {
                                             const noteCard = document.createElement('div');
