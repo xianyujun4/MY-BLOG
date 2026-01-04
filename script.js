@@ -1023,8 +1023,8 @@ function showNewText(diamond) {
                             // 隐藏原框内的文字
                             boxText.style.opacity = '0';
                             
-                            // 如果是第一个框，显示模块化笔记
-                            if (index === 0) {
+                            // 如果是第一个或第二个框，显示模块化内容
+                            if (index === 0 || index === 1) {
                                 // 创建标题容器，包含左上角的线条和文字动画
                                 const titleContainer = document.createElement('div');
                                 titleContainer.style.position = 'absolute';
@@ -1084,7 +1084,67 @@ function showNewText(diamond) {
                                 notesContainer.className = 'notes-container';
                                 notesContainer.style.position = 'absolute';
                                 notesContainer.style.top = '150px';
-                                notesContainer.style.left = '50px';
+                                
+                                // 根据盒子索引决定是否显示分类导航
+                                let notesContainerLeft = '50px';
+                                if (index === 1) {
+                                    // 第二个盒子：分享，显示分类导航
+                                    // 创建分类导航
+                                    const categoryNav = document.createElement('div');
+                                    categoryNav.className = 'category-nav';
+                                    categoryNav.style.position = 'absolute';
+                                    categoryNav.style.top = '150px';
+                                    categoryNav.style.left = '50px';
+                                    categoryNav.style.zIndex = '99999';
+                                    categoryNav.style.marginBottom = '20px';
+                                    categoryNav.style.display = 'flex';
+                                    categoryNav.style.flexDirection = 'column';
+                                    categoryNav.style.gap = '10px';
+                                    
+                                    // 创建分类链接
+                                    const categories = ['全部', '音乐', '图片'];
+                                    categories.forEach(category => {
+                                        const categoryLink = document.createElement('a');
+                                        categoryLink.href = '#';
+                                        categoryLink.textContent = `> ${category}`;
+                                        categoryLink.style.fontFamily = 'Courier New, monospace';
+                                        categoryLink.style.fontSize = '0.9rem';
+                                        categoryLink.style.color = 'var(--text-color)';
+                                        categoryLink.style.textDecoration = 'none';
+                                        categoryLink.style.transition = 'all 0.3s ease';
+                                        categoryLink.style.cursor = 'pointer';
+                                        categoryLink.style.opacity = '0';
+                                        categoryLink.style.transform = 'translateX(-100%)';
+                                        
+                                        // 添加点击事件（暂时只是示例）
+                                        categoryLink.addEventListener('click', (e) => {
+                                            e.preventDefault();
+                                            console.log(`点击了分类: ${category}`);
+                                        });
+                                        
+                                        categoryNav.appendChild(categoryLink);
+                                    });
+                                    
+                                    expandedBox.appendChild(categoryNav);
+                                    
+                                    // 设置笔记容器位置，为分类导航留出空间
+                                    notesContainerLeft = '120px';
+                                    
+                                    // 添加分类导航的入场动画
+                                    setTimeout(() => {
+                                        const categoryLinks = categoryNav.querySelectorAll('a');
+                                        categoryLinks.forEach((link, linkIndex) => {
+                                            setTimeout(() => {
+                                                link.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
+                                                link.style.opacity = '1';
+                                                link.style.transform = 'translateX(0)';
+                                            }, 300 + linkIndex * 100); // 逐个显示，与标题动画衔接
+                                        });
+                                    }, 600); // 与标题动画同时开始
+                                }
+                                
+                                // 设置笔记容器样式
+                                notesContainer.style.left = notesContainerLeft;
                                 notesContainer.style.right = '50px';
                                 notesContainer.style.bottom = '50px';
                                 notesContainer.style.zIndex = '99999';
@@ -1092,12 +1152,22 @@ function showNewText(diamond) {
                                 
                                 expandedBox.appendChild(notesContainer);
                                 
-                                // 从JSON文件读取笔记数据
-                                fetch('notes.json')
-                                    .then(response => response.json())
-                                    .then(notes => {
+                                // 根据盒子索引决定加载笔记还是分享内容
+                                let contentPromise;
+                                if (index === 0) {
+                                    // 第一个盒子：加载笔记内容
+                                    contentPromise = fetch('notes.json')
+                                        .then(response => response.json());
+                                } else {
+                                    // 第二个盒子：分享
+                                    // 从JSON文件读取分享内容
+                                    contentPromise = fetch('share.json')
+                                        .then(response => response.json());
+                                }
+                                 
+                                contentPromise.then(items => {
                                         // 按创建时间由近到远排序（最新的在前面）
-                                        notes.sort((a, b) => {
+                                        items.sort((a, b) => {
                                             // 转换'年-月-日-时:分'格式为ISO格式，便于Date对象解析
                                             const formatDate = (dateStr) => {
                                                 // 处理格式：YYYY-MM-DD-HH:mm
@@ -1117,8 +1187,8 @@ function showNewText(diamond) {
                                             return dateB - dateA; // 最新的在前
                                         });
                                         
-                                        // 渲染笔记
-                                        notes.forEach(note => {
+                                        // 渲染内容卡片
+                                        items.forEach(item => {
                                             const noteCard = document.createElement('div');
                                             noteCard.className = 'note-card';
                                             noteCard.style.marginBottom = '30px';
@@ -1131,13 +1201,32 @@ function showNewText(diamond) {
                                             noteCard.style.transform = 'translateY(20px)';
                                             noteCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                                             
-                                            noteCard.innerHTML = `
-                                                <h3 class="note-title" style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 10px; line-height: 1.4;">${note.title}</h3>
-                                                <p class="note-content" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.6;">${note.content}</p>
-                                                <div class="note-footer" style="display: flex; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #999;">
-                                                    <span class="note-date">${note.date}</span>
-                                                </div>
-                                            `;
+                                            // 根据盒子索引决定渲染不同的卡片样式
+                                            let cardContent;
+                                            if (index === 0) {
+                                                // 笔记卡片样式
+                                                cardContent = `
+                                                    <h3 class="note-title" style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-color); margin-bottom: 10px; line-height: 1.4;">${item.title}</h3>
+                                                    <p class="note-content" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.6;">${item.content}</p>
+                                                    <div class="note-footer" style="display: flex; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #999;">
+                                                        <span class="note-date">${item.date}</span>
+                                                    </div>
+                                                `;
+                                            } else {
+                                                // 分享卡片样式
+                                                cardContent = `
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <h3 class="note-title" style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--text-color); line-height: 1.4;">${item.title}</h3>
+                                                        <span class="share-type" style="font-family: 'Courier New', monospace; font-size: 0.8rem; color: var(--text-color); background-color: rgba(0, 0, 0, 0.05); padding: 4px 12px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.1);">${item.type}</span>
+                                                    </div>
+                                                    <p class="note-content" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #666; margin-bottom: 15px; line-height: 1.6;">${item.description}</p>
+                                                    <div class="note-footer" style="display: flex; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #999;">
+                                                        <span class="note-date">${item.date}</span>
+                                                    </div>
+                                                `;
+                                            }
+                                            
+                                            noteCard.innerHTML = cardContent;
                                             
                                             notesContainer.appendChild(noteCard);
                                         });
@@ -1152,10 +1241,10 @@ function showNewText(diamond) {
                                                 }, cardIndex * 200); // 每个卡片间隔200ms出现
                                             });
                                             
-                                            // 为每个笔记卡片添加点击事件，展开详情页
-                                            noteCards.forEach((card, index) => {
+                                            // 为每个卡片添加点击事件，展开详情页
+                                            noteCards.forEach((card, cardIndex) => {
                                                 card.addEventListener('click', () => {
-                                                    const note = notes[index];
+                                                    const item = items[cardIndex];
                                                     
                                                     // 创建笔记详情容器
                                                     const noteDetailContainer = document.createElement('div');
@@ -1173,19 +1262,49 @@ function showNewText(diamond) {
                                                     noteDetailContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
                                                     
                                                     // 设置详情页内容
-                                                    noteDetailContainer.innerHTML = `
-                                                        <div style="max-width: 800px; margin: 80px auto; padding: 0 20px;">
-                                                            <div style="margin-bottom: 40px;">
-                                                                <h1 style="font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 700; color: var(--text-color); margin-bottom: 20px; line-height: 1.4;">${note.title}</h1>
-                                                                <div style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
-                                                                    <span>${note.date}</span>
+                                                    let detailContent;
+                                                    if (index === 0) {
+                                                        // 笔记详情页
+                                                        detailContent = `
+                                                            <div style="max-width: 800px; margin: 80px auto; padding: 0 20px;">
+                                                                <div style="margin-bottom: 40px;">
+                                                                    <h1 style="font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 700; color: var(--text-color); margin-bottom: 20px; line-height: 1.4;">${item.title}</h1>
+                                                                    <div style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
+                                                                        <span>${item.date}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 30px;">
+                                                                    <p style="font-family: 'Courier New', monospace; font-size: 1.1rem; color: #333; line-height: 1.8;">${item.content}</p>
                                                                 </div>
                                                             </div>
-                                                            <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 30px;">
-                                                                <p style="font-family: 'Courier New', monospace; font-size: 1.1rem; color: #333; line-height: 1.8;">${note.content}</p>
+                                                        `;
+                                                    } else {
+                                                        // 分享详情页
+                                                        detailContent = `
+                                                            <div style="max-width: 800px; margin: 80px auto; padding: 0 20px;">
+                                                                <div style="margin-bottom: 20px;">
+                                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                                                        <h1 style="font-family: 'Courier New', monospace; font-size: 2rem; font-weight: 700; color: var(--text-color); line-height: 1.4;">${item.title}</h1>
+                                                                        <span class="share-type" style="font-family: 'Courier New', monospace; font-size: 0.9rem; color: var(--text-color); background-color: rgba(0, 0, 0, 0.05); padding: 6px 16px; border-radius: 16px; border: 1px solid rgba(0, 0, 0, 0.1);">${item.type}</span>
+                                                                    </div>
+                                                                    <div style="display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
+                                                                        <span>${item.date}</span>
+                                                                        <a href="${item.link}" target="_blank" style="color: var(--text-color); text-decoration: none; padding: 0; transition: all 0.3s ease;">
+                                                                            &gt;链接
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <div style="border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 30px; margin-bottom: 40px;">
+                                                                    <p style="font-family: 'Courier New', monospace; font-size: 1.1rem; color: #333; line-height: 1.8; margin-bottom: 30px;">${item.description}</p>
+                                                                    <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+                                                                        <img src="${item.image}" alt="${item.title}" style="max-width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.1);">
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    `;
+                                                        `;
+                                                    }
+                                                    
+                                                    noteDetailContainer.innerHTML = detailContent;
                                                     
                                                     document.body.appendChild(noteDetailContainer);
                                                     
@@ -1208,8 +1327,8 @@ function showNewText(diamond) {
                                                     });
                                                     
                                                     // 添加点击任意位置关闭（除了内容区域）
-                                                    const detailContent = noteDetailContainer.querySelector('div');
-                                                    detailContent.addEventListener('click', (e) => {
+                                                    const detailContentDiv = noteDetailContainer.querySelector('div');
+                                                    detailContentDiv.addEventListener('click', (e) => {
                                                         e.stopPropagation(); // 阻止事件冒泡到容器
                                                     });
                                                     
@@ -1574,23 +1693,34 @@ function showNewText(diamond) {
                                 boxText.style.opacity = '1';
                             }
                             
-                            // 检查是否是第一个框（模块化笔记）
+                            // 检查是否是第一个或第二个框（模块化内容）
                             const notesContainer = expandedBox.querySelector('.notes-container');
                             const titleContainer = expandedBox.querySelector('.notes-container') ? expandedBox.querySelector(':scope > div:first-child') : null;
                             const titleText = expandedBox.querySelector('.new-text');
                             const line = expandedBox.querySelector('.new-text-line');
+                            const categoryNav = expandedBox.querySelector('.category-nav');
                             
                             if (notesContainer && titleContainer && titleText && line) {
-                                // 1. 标题文字向左飞出，线条消失
+                                // 1. 标题文字和分类导航文字同时向左飞出，线条消失
                                 titleText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
                                 titleText.style.opacity = '0';
                                 titleText.style.transform = 'translateX(-100%)';
+                                
+                                // 处理分类导航文字
+                                if (categoryNav) {
+                                    const categoryLinks = categoryNav.querySelectorAll('a');
+                                    categoryLinks.forEach(link => {
+                                        link.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                        link.style.opacity = '0';
+                                        link.style.transform = 'translateX(-100%)';
+                                    });
+                                }
                                 
                                 line.style.transition = 'width 0.3s ease';
                                 line.style.width = '0';
                                 line.style.transformOrigin = 'right center';
                                 
-                                // 2. 文字动画完成后，模块化笔记消失
+                                // 2. 文字动画完成后，模块化内容消失
                                 setTimeout(() => {
                                     const noteCards = notesContainer.querySelectorAll('.note-card');
                                     noteCards.forEach((card, cardIndex) => {

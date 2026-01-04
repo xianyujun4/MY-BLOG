@@ -1,0 +1,26 @@
+[
+    {
+        "type": "音乐",
+        "title": "分享标题1",
+        "description": "这是第一个分享的内容，展示分享功能的实现效果。",
+        "image": "https://example.com/image1.jpg",
+        "link": "https://example.com/music1",
+        "date": "2025-12-15-14:30"
+    },
+    {
+        "type": "图片",
+        "title": "分享标题2",
+        "description": "这是第二个分享的内容，包含更多详细信息和样式展示。",
+        "image": "https://example.com/image2.jpg",
+        "link": "https://example.com/image1",
+        "date": "2025-12-14-10:15"
+    },
+    {
+        "type": "音乐",
+        "title": "分享标题3",
+        "description": "这是第三个分享的内容，用于测试布局和动画效果。",
+        "image": "https://example.com/image3.jpg",
+        "link": "https://example.com/music2",
+        "date": "2025-12-13-16:45"
+    }
+]
