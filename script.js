@@ -1576,7 +1576,7 @@ function showNewText(diamond) {
                                         <section class="website-section" style="margin-bottom: 60px; text-align: center;">
                                             <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 30px; color: var(--text-color);">关于网站</h3>
                                             <div class="website-content" style="max-width: 800px; margin: 0 auto; text-align: left;">
-                                                <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 本网站采用100%的AI构筑</div>
+                                                <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 本网站代码100%由AI编写</div>
                                                 <div style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">• 网站为个人博客网站,已在Github开源</div>
                                             </div>
                                         </section>
@@ -1921,4 +1921,5 @@ function showNewText(diamond) {
             }, 1500); // 圆形移动动画持续1.5秒
         }, 1000); // 文字旋转变形动画持续1秒
     }
+
 }
