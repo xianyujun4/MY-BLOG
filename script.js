@@ -1013,9 +1013,13 @@ function showNewText(diamond) {
                         const originalBackground = box.style.background;
                         const originalZIndex = box.style.zIndex;
                         
+                        // 创建一个setTimeout数组，用于存储所有的setTimeout ID，便于在关闭时清除
+                        const timeouts = [];
+                        
                         // 创建一个新的放大元素，而不是修改原元素
                         const expandedBox = document.createElement('div');
                         expandedBox.className = 'expanded-box';
+                        expandedBox._timeouts = timeouts; // 将timeouts数组附加到expandedBox上，便于在closeHandler中访问
                         
                         // 获取原框内的文字内容
                         const boxText = box.querySelector('.box-text');
@@ -1063,7 +1067,7 @@ function showNewText(diamond) {
                                 expandedBox.appendChild(titleContainer);
                                 
                                 // 触发标题和线条动画
-                                setTimeout(() => {
+                                timeouts.push(setTimeout(() => {
                                     // 设置动画时长为0.3秒
                                     titleText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
                                     line.style.transition = 'width 0.3s ease';
@@ -1073,11 +1077,11 @@ function showNewText(diamond) {
                                     titleText.style.transform = 'translateX(0)';
                                     
                                     // 获取文字宽度并设置线条宽度
-                                    setTimeout(() => {
+                                    timeouts.push(setTimeout(() => {
                                         const textWidth = titleText.offsetWidth;
                                         line.style.width = `${textWidth}px`;
-                                    }, 300);
-                                }, 600); // 放大动画结束后开始（放大动画持续500ms）
+                                    }, 300));
+                                }, 600)); // 放大动画结束后开始（放大动画持续500ms）
                                 
                                 // 创建笔记容器
                                 const notesContainer = document.createElement('div');
@@ -1131,14 +1135,14 @@ function showNewText(diamond) {
                                     notesContainerLeft = '120px';
                                     
                                     // 添加分类导航的入场动画
-                                    setTimeout(() => {
+                                    timeouts.push(setTimeout(() => {
                                         const categoryLinks = categoryNav.querySelectorAll('a');
                                         categoryLinks.forEach((link, linkIndex) => {
-                                            setTimeout(() => {
+                                            timeouts.push(setTimeout(() => {
                                                 link.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
                                                 link.style.opacity = '1';
                                                 link.style.transform = 'translateX(0)';
-                                            }, 300 + linkIndex * 100); // 逐个显示，与标题动画衔接
+                                            }, 300 + linkIndex * 100)); // 逐个显示，与标题动画衔接
                                         });
                                         
                                         // 为分类导航添加筛选功能
@@ -1172,7 +1176,7 @@ function showNewText(diamond) {
                                                 });
                                             });
                                         });
-                                    }, 600); // 与标题动画同时开始
+                                    }, 600)); // 与标题动画同时开始
                                 }
                                 
                                 // 设置笔记容器样式
@@ -1272,10 +1276,10 @@ function showNewText(diamond) {
                                         setTimeout(() => {
                                             const noteCards = notesContainer.querySelectorAll('.note-card');
                                             noteCards.forEach((card, cardIndex) => {
-                                                setTimeout(() => {
+                                                timeouts.push(setTimeout(() => {
                                                     card.style.opacity = '1';
                                                     card.style.transform = 'translateY(0)';
-                                                }, cardIndex * 200); // 每个卡片间隔200ms出现
+                                                }, cardIndex * 200)); // 每个卡片间隔200ms出现
                                             });
                                             
                                             // 为每个卡片添加点击事件，展开详情页
@@ -1512,11 +1516,11 @@ function showNewText(diamond) {
                                     expandedBox.appendChild(textContainer);
                                     
                                     // 触发文字飞入动画
-                                    setTimeout(() => {
+                                    timeouts.push(setTimeout(() => {
                                         newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
                                         newText.style.opacity = '1';
                                         newText.style.transform = 'translateX(0)';
-                                    }, 600);
+                                    }, 600));
                                     
                                     // 创建关于内容容器
                                     const aboutContainer = document.createElement('div');
@@ -1610,10 +1614,10 @@ function showNewText(diamond) {
                                     expandedBox.appendChild(aboutContainer);
                                     
                                     // 触发关于内容动画
-                                    setTimeout(() => {
+                                    timeouts.push(setTimeout(() => {
                                         aboutContainer.style.opacity = '1';
                                         aboutContainer.style.transform = 'translateY(0)';
-                                    }, 900); // 文字动画后延迟300ms
+                                    }, 900)); // 文字动画后延迟300ms
                                 } else {
                                     // 其他框（TEST2、TEST3）：删除飞入的线条，只保留文字动画
                                     // 创建新的文字容器
@@ -1644,11 +1648,11 @@ function showNewText(diamond) {
                                     expandedBox.appendChild(textContainer);
                                     
                                     // 触发文字飞入动画
-                                    setTimeout(() => {
+                                    timeouts.push(setTimeout(() => {
                                         newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-out';
                                         newText.style.opacity = '1';
                                         newText.style.transform = 'translateX(0)';
-                                    }, 600);
+                                    }, 600));
                                 }
                             }
                         }
@@ -1678,19 +1682,19 @@ function showNewText(diamond) {
                         expandedBox.offsetHeight;
                         
                         // 开始放大动画
-                        setTimeout(() => {
+                        timeouts.push(setTimeout(() => {
                             expandedBox.style.top = '0';
                             expandedBox.style.left = '0';
                             expandedBox.style.width = '100vw';
                             expandedBox.style.height = '100vh';
-                        }, 10);
+                        }, 10));
                         
                         // 放大动画结束后（0.5秒），设置新元素的z-index覆盖原框
-                        setTimeout(() => {
+                        timeouts.push(setTimeout(() => {
                             expandedBox.style.zIndex = '9999'; // 放大后覆盖原框
                             box.style.border = 'none';
                             box.style.background = 'none';
-                        }, 500);
+                        }, 500));
                         
                         // 添加ESC键关闭功能
                         const escKeyHandler = (e) => {
@@ -1716,9 +1720,16 @@ function showNewText(diamond) {
                                 return;
                             }
                             
-                            // 只有点击expandedBox本身（空白区域）时才执行退出操作
-                            if (e.target !== expandedBox) {
+                            // 只有点击expandedBox本身（空白区域）或通过ESC键调用时才执行退出操作
+                            // 如果是ESC键调用，e可能是键盘事件，此时e.target不是expandedBox
+                            if (e && e.type === 'click' && e.target !== expandedBox) {
                                 return;
+                            }
+                            
+                            // 清除所有未执行的定时器，中断进入动画
+                            if (expandedBox._timeouts) {
+                                expandedBox._timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+                                expandedBox._timeouts = []; // 清空数组
                             }
                             
                             // 移除ESC键监听
