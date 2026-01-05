@@ -1140,6 +1140,38 @@ function showNewText(diamond) {
                                                 link.style.transform = 'translateX(0)';
                                             }, 300 + linkIndex * 100); // 逐个显示，与标题动画衔接
                                         });
+                                        
+                                        // 为分类导航添加筛选功能
+                                        categoryLinks.forEach(link => {
+                                            link.addEventListener('click', (e) => {
+                                                e.preventDefault();
+                                                
+                                                // 获取点击的分类
+                                                const category = link.textContent.replace('> ', '').trim();
+                                                
+                                                // 获取所有分享卡片
+                                                const shareCards = notesContainer.querySelectorAll('.note-card');
+                                                
+                                                // 筛选并显示/隐藏卡片
+                                                shareCards.forEach(card => {
+                                                    const cardType = card.querySelector('.share-type').textContent;
+                                                    if (category === '全部' || cardType === category) {
+                                                        // 显示符合条件的卡片
+                                                        card.style.display = 'block';
+                                                        // 重新触发动画
+                                                        card.style.opacity = '0';
+                                                        card.style.transform = 'translateY(20px)';
+                                                        setTimeout(() => {
+                                                            card.style.opacity = '1';
+                                                            card.style.transform = 'translateY(0)';
+                                                        }, 100);
+                                                    } else {
+                                                        // 隐藏不符合条件的卡片
+                                                        card.style.display = 'none';
+                                                    }
+                                                });
+                                            });
+                                        });
                                     }, 600); // 与标题动画同时开始
                                 }
                                 
@@ -1151,6 +1183,9 @@ function showNewText(diamond) {
                                 notesContainer.style.overflow = 'auto';
                                 
                                 expandedBox.appendChild(notesContainer);
+                                
+                                // 保存原始的分享数据，用于分类筛选
+                                let originalItems = [];
                                 
                                 // 根据盒子索引决定加载笔记还是分享内容
                                 let contentPromise;
@@ -1166,6 +1201,8 @@ function showNewText(diamond) {
                                 }
                                  
                                 contentPromise.then(items => {
+                                    // 保存原始数据
+                                    originalItems = [...items];
                                         // 按创建时间由近到远排序（最新的在前面）
                                         items.sort((a, b) => {
                                             // 转换'年-月-日-时:分'格式为ISO格式，便于Date对象解析
@@ -1676,6 +1713,11 @@ function showNewText(diamond) {
                             // 检查是否有笔记详情页打开，如果有则不处理
                             const noteDetailContainer = document.querySelector('.note-detail-container');
                             if (noteDetailContainer) {
+                                return;
+                            }
+                            
+                            // 只有点击expandedBox本身（空白区域）时才执行退出操作
+                            if (e.target !== expandedBox) {
                                 return;
                             }
                             
