@@ -1979,3 +1979,56 @@ function showNewText(diamond) {
         }, 1000); // 文字旋转变形动画持续1秒
     }
 }
+
+// 手机端返回键处理
+window.addEventListener('DOMContentLoaded', () => {
+    let lastBackPressTime = 0;
+    let isMainPage = true;
+    
+    // 监听页面状态变化，判断是否在主界面
+    function updatePageStatus() {
+        // 检查是否有展开的页面或详情页
+        const expandedBox = document.querySelector('.expanded-box');
+        const noteDetailContainer = document.querySelector('.note-detail-container');
+        isMainPage = !expandedBox && !noteDetailContainer;
+    }
+    
+    // 监听popstate事件处理返回键
+    window.addEventListener('popstate', (e) => {
+        e.preventDefault(); // 阻止默认的浏览器返回行为
+        
+        updatePageStatus();
+        
+        if (isMainPage) {
+            // 在主界面，处理两次返回退出
+            const now = Date.now();
+            if (now - lastBackPressTime < 2000) {
+                // 两次返回间隔小于2秒，退出网站
+                window.history.go(-100); // 强制退出
+            } else {
+                // 第一次返回，显示提示
+                const tip = document.getElementById('back-button-tip');
+                tip.textContent = '再按一次返回键退出';
+                tip.style.opacity = '1';
+                
+                // 2秒后隐藏提示
+                setTimeout(() => {
+                    tip.style.opacity = '0';
+                }, 2000);
+                
+                lastBackPressTime = now;
+            }
+        } else {
+            // 不在主界面，模拟ESC键效果
+            const escEvent = new KeyboardEvent('keydown', {
+                key: 'Escape',
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(escEvent);
+        }
+    });
+    
+    // 初始化pushState，确保返回键能被监听
+    window.history.pushState(null, null, window.location.href);
+});
