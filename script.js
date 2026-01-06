@@ -1033,28 +1033,26 @@ function showNewText(diamond) {
                 // 移动端尝试唤起APP
                 const appUrl = `neteasecloudmusic://song/${songId}`;
                 
-                // 尝试唤起APP
+                // 使用iframe方法尝试唤起APP，这种方式更可靠
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = appUrl;
+                document.body.appendChild(iframe);
+                
+                // 同时尝试直接修改location.href
                 window.location.href = appUrl;
                 
-                // 检测是否成功唤起，失败则跳转到网页
-                let isAppOpened = false;
-                
-                // 监听页面可见性变化
-                const handleVisibilityChange = () => {
-                    if (document.hidden) {
-                        isAppOpened = true;
-                    }
-                };
-                
-                document.addEventListener('visibilitychange', handleVisibilityChange);
-                
-                // 500ms 后检查是否成功唤起
+                // 设置一个定时器，延迟后检查是否需要跳转网页
+                // 延长检测时间到1000ms，提高检测准确性
                 setTimeout(() => {
-                    document.removeEventListener('visibilitychange', handleVisibilityChange);
-                    if (!isAppOpened) {
-                        window.open(webUrl, '_blank');
+                    // 移除iframe
+                    if (iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
                     }
-                }, 500);
+                    
+                    // 尝试打开网页版
+                    window.open(webUrl, '_blank');
+                }, 1000);
             } else {
                 // PC 端直接跳转网页
                 window.open(webUrl, '_blank');
