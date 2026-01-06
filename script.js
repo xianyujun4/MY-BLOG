@@ -1579,7 +1579,7 @@ function showNewText(diamond) {
                                             <div class="avatar-content" style="display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 40px; flex-wrap: wrap;">
                                                 <!-- 左侧头像 -->
                                                 <div class="avatar-container" style="flex-shrink: 0;">
-                                                    <img src="https://p3-pc-sign.douyinpic.com/aweme-avatar/tos-cn-i-c9aec8xkvj_e2d3d20ddd4c4e3db22eb5d5bcc75b14~tplv-8yspqt5zfm-300x300.webp?lk3s=93de098e&x-expires=1767679200&x-signature=%2FcfKt%2B%2FMudHbRPtQZe9SG9xefe0%3D&from=2480802190&s=profile&se=false&sc=avatar&l=202601041431441732686B9F282B93D889" 
+                                                    <img src="https://avatars.githubusercontent.com/u/79352027"
                                                         alt="头像" 
                                                         style="width: 200px; height: 200px; border-radius: 8px; object-fit: cover; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);">
                                                 </div>
@@ -2150,3 +2150,4 @@ window.__backButtonInit = function() {
 
 // 重新初始化
 window.__backButtonInit();
+
