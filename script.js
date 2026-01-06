@@ -1002,24 +1002,83 @@ function showNewText(diamond) {
                     }, index * 30 + 100); // 每个框间隔30ms，整体延迟100ms
                 });
                 
-                // 为所有框添加点击事件监听
-                boxes.forEach((box, index) => {
-                    box.addEventListener('click', () => {
-                        // 获取框的当前位置和尺寸
-                        const rect = box.getBoundingClientRect();
-                        
-                        // 保存原框的样式，用于恢复
-                        const originalBorder = box.style.border;
-                        const originalBackground = box.style.background;
-                        const originalZIndex = box.style.zIndex;
-                        
-                        // 创建一个setTimeout数组，用于存储所有的setTimeout ID，便于在关闭时清除
-                        const timeouts = [];
-                        
-                        // 创建一个新的放大元素，而不是修改原元素
-                        const expandedBox = document.createElement('div');
-                        expandedBox.className = 'expanded-box';
-                        expandedBox._timeouts = timeouts; // 将timeouts数组附加到expandedBox上，便于在closeHandler中访问
+                // 解析网易云音乐链接，提取songId
+        const extractSongId = (link) => {
+            const match = link.match(/id=(\d+)/);
+            return match ? match[1] : null;
+        };
+        
+        // 检测设备类型
+        const getDeviceType = () => {
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (/mobile|android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)) {
+                return 'mobile';
+            }
+            return 'pc';
+        };
+        
+        // 尝试唤起网易云音乐APP，失败则跳转网页
+        window.openNetEaseMusic = (link) => {
+            const songId = extractSongId(link);
+            if (!songId) {
+                // 如果无法解析songId，直接跳转原链接
+                window.open(link, '_blank');
+                return;
+            }
+            
+            const deviceType = getDeviceType();
+            const webUrl = `https://music.163.com/song?id=${songId}`;
+            
+            if (deviceType === 'mobile') {
+                // 移动端尝试唤起APP
+                const appUrl = `neteasecloudmusic://song/${songId}`;
+                
+                // 尝试唤起APP
+                window.location.href = appUrl;
+                
+                // 检测是否成功唤起，失败则跳转到网页
+                let isAppOpened = false;
+                
+                // 监听页面可见性变化
+                const handleVisibilityChange = () => {
+                    if (document.hidden) {
+                        isAppOpened = true;
+                    }
+                };
+                
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+                
+                // 500ms 后检查是否成功唤起
+                setTimeout(() => {
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                    if (!isAppOpened) {
+                        window.open(webUrl, '_blank');
+                    }
+                }, 500);
+            } else {
+                // PC 端直接跳转网页
+                window.open(webUrl, '_blank');
+            }
+        };
+        
+        // 为所有框添加点击事件监听
+        boxes.forEach((box, index) => {
+            box.addEventListener('click', () => {
+                // 获取框的当前位置和尺寸
+                const rect = box.getBoundingClientRect();
+                
+                // 保存原框的样式，用于恢复
+                const originalBorder = box.style.border;
+                const originalBackground = box.style.background;
+                const originalZIndex = box.style.zIndex;
+                
+                // 创建一个setTimeout数组，用于存储所有的setTimeout ID，便于在关闭时清除
+                const timeouts = [];
+                
+                // 创建一个新的放大元素，而不是修改原元素
+                const expandedBox = document.createElement('div');
+                expandedBox.className = 'expanded-box';
+                expandedBox._timeouts = timeouts; // 将timeouts数组附加到expandedBox上，便于在closeHandler中访问
                         
                         // 获取原框内的文字内容
                         const boxText = box.querySelector('.box-text');
@@ -1330,7 +1389,7 @@ function showNewText(diamond) {
                                                                     </div>
                                                                     <div style="display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
                                                                         <span>${item.date}</span>
-                                                                        <a href="${item.link}" target="_blank" style="color: var(--text-color); text-decoration: none; padding: 0; transition: all 0.3s ease;">
+                                                                        <a href="javascript:void(0);" onclick="openNetEaseMusic('${item.link}')" style="color: var(--text-color); text-decoration: none; padding: 0; transition: all 0.3s ease;">
                                                                             &gt;链接
                                                                         </a>
                                                                     </div>
@@ -1921,5 +1980,4 @@ function showNewText(diamond) {
             }, 1500); // 圆形移动动画持续1.5秒
         }, 1000); // 文字旋转变形动画持续1秒
     }
-
 }
