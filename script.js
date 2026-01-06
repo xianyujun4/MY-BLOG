@@ -2027,6 +2027,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     tip.style.opacity = '0';
                 }, 2000);
                 
+                // 只有在主界面点击返回键时，才更新lastBackPressTime
                 lastBackPressTime = now;
             }
         } else {
@@ -2038,6 +2039,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 cancelable: true
             });
             document.dispatchEvent(escEvent);
+            
+            // 非主界面点击返回键时，不更新lastBackPressTime
+            // 这样只有在主界面连续点击两次返回键才会触发退出
         }
     });
     
