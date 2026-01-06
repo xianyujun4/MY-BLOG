@@ -1997,9 +1997,20 @@ window.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', (e) => {
         e.preventDefault(); // 阻止默认的浏览器返回行为
         
-        updatePageStatus();
+        // 直接在事件触发时检测页面状态，不依赖于之前的状态变量
+        const expandedBox = document.querySelector('.expanded-box');
+        const noteDetailContainer = document.querySelector('.note-detail-container');
         
-        if (isMainPage) {
+        // 只有当没有打开的预览页且没有详情页时，才是主界面
+        const isMainPageNow = !expandedBox && !noteDetailContainer;
+        
+        console.log('Return key pressed:', {
+            expandedBox: !!expandedBox,
+            noteDetailContainer: !!noteDetailContainer,
+            isMainPageNow: isMainPageNow
+        });
+        
+        if (isMainPageNow) {
             // 在主界面，处理两次返回退出
             const now = Date.now();
             if (now - lastBackPressTime < 2000) {
@@ -2020,6 +2031,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // 不在主界面，模拟ESC键效果
+            console.log('Simulating ESC key press');
             const escEvent = new KeyboardEvent('keydown', {
                 key: 'Escape',
                 bubbles: true,
