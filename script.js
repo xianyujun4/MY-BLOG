@@ -1401,23 +1401,49 @@ function showNewText(diamond) {
                                                             e.stopImmediatePropagation();
                                                             e.preventDefault();
                                                             
-                                                            noteDetailContainer.style.opacity = '0';
-                                                            noteDetailContainer.style.transform = 'scale(0.95)';
-                                                            
-                                                            setTimeout(() => {
-                                                                // 移除详情页的ESC事件监听器
-                                                                document.removeEventListener('keydown', escKeyHandler, true);
-                                                                
-                                                                // 重新添加所有原来的ESC事件监听器
-                                                                allEscHandlers.forEach(({ listener, options }) => {
-                                                                    originalAddEventListener.call(document, 'keydown', listener, options);
-                                                                });
-                                                                
-                                                                // 移除详情页元素
-                                                                document.body.removeChild(noteDetailContainer);
-                                                            }, 500);
+                                                            closeDetailPage();
                                                         }
                                                     };
+                                                    
+                                                    // 添加手机端滑动退出功能
+                                                    let touchStartX = 0;
+                                                    let touchEndX = 0;
+                                                    const SWIPE_THRESHOLD = 50;
+                                                    
+                                                    const closeDetailPage = () => {
+                                                        noteDetailContainer.style.opacity = '0';
+                                                        noteDetailContainer.style.transform = 'scale(0.95)';
+                                                        
+                                                        setTimeout(() => {
+                                                            // 移除详情页的ESC事件监听器
+                                                            document.removeEventListener('keydown', escKeyHandler, true);
+                                                            
+                                                            // 重新添加所有原来的ESC事件监听器
+                                                            allEscHandlers.forEach(({ listener, options }) => {
+                                                                originalAddEventListener.call(document, 'keydown', listener, options);
+                                                            });
+                                                            
+                                                            // 移除详情页元素
+                                                            document.body.removeChild(noteDetailContainer);
+                                                        }, 500);
+                                                    };
+                                                    
+                                                    const handleTouchStart = (e) => {
+                                                        touchStartX = e.changedTouches[0].screenX;
+                                                    };
+                                                    
+                                                    const handleTouchEnd = (e) => {
+                                                        touchEndX = e.changedTouches[0].screenX;
+                                                        const swipeDistance = touchEndX - touchStartX;
+                                                        
+                                                        if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+                                                            closeDetailPage();
+                                                        }
+                                                    };
+                                                    
+                                                    // 添加触摸事件监听
+                                                    noteDetailContainer.addEventListener('touchstart', handleTouchStart, false);
+                                                    noteDetailContainer.addEventListener('touchend', handleTouchEnd, false);
                                                     
                                                     // 恢复原始的addEventListener方法
                                                     document.addEventListener = originalAddEventListener;
@@ -1711,6 +1737,37 @@ function showNewText(diamond) {
                         
                         // 为当前页面添加ESC键监听
                         document.addEventListener('keydown', escKeyHandler);
+                        
+                        // 添加手机端滑动退出功能
+                        let touchStartX = 0;
+                        let touchEndX = 0;
+                        
+                        // 滑动检测阈值
+                        const SWIPE_THRESHOLD = 50;
+                        
+                        const handleTouchStart = (e) => {
+                            touchStartX = e.changedTouches[0].screenX;
+                        };
+                        
+                        const handleTouchEnd = (e) => {
+                            touchEndX = e.changedTouches[0].screenX;
+                            handleSwipe();
+                        };
+                        
+                        const handleSwipe = () => {
+                            // 计算滑动距离
+                            const swipeDistance = touchEndX - touchStartX;
+                            
+                            // 检查是否是有效的左右滑动
+                            if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+                                // 无论是左滑还是右滑，都执行关闭操作
+                                closeHandler();
+                            }
+                        };
+                        
+                        // 添加触摸事件监听
+                        expandedBox.addEventListener('touchstart', handleTouchStart, false);
+                        expandedBox.addEventListener('touchend', handleTouchEnd, false);
                         
                         // 定义关闭处理函数
                         const closeHandler = (e) => {
