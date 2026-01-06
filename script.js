@@ -1033,26 +1033,50 @@ function showNewText(diamond) {
                 // 移动端尝试唤起APP
                 const appUrl = `neteasecloudmusic://song/${songId}`;
                 
-                // 使用iframe方法尝试唤起APP，这种方式更可靠
+                // 激进的三重唤醒机制
+                
+                // 1. 使用a标签点击方式（最可靠的方式之一）
+                const aTag = document.createElement('a');
+                aTag.href = appUrl;
+                aTag.style.display = 'none';
+                document.body.appendChild(aTag);
+                
+                // 模拟点击a标签
+                if (typeof aTag.click === 'function') {
+                    aTag.click();
+                } else {
+                    // 兼容旧浏览器
+                    const evt = document.createEvent('MouseEvents');
+                    evt.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+                    aTag.dispatchEvent(evt);
+                }
+                
+                // 2. 同时直接修改location.href
+                window.location.href = appUrl;
+                
+                // 3. 添加iframe方式作为补充
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 iframe.src = appUrl;
                 document.body.appendChild(iframe);
                 
-                // 同时尝试直接修改location.href
-                window.location.href = appUrl;
-                
-                // 设置一个定时器，延迟后检查是否需要跳转网页
-                // 延长检测时间到1000ms，提高检测准确性
+                // 不使用定时器检测，直接让浏览器处理
+                // 浏览器会在尝试唤起APP失败后自动跳转
+                // 设置一个非常短的延迟后移除iframe
                 setTimeout(() => {
-                    // 移除iframe
                     if (iframe.parentNode) {
                         iframe.parentNode.removeChild(iframe);
                     }
-                    
-                    // 尝试打开网页版
+                    if (aTag.parentNode) {
+                        aTag.parentNode.removeChild(aTag);
+                    }
+                }, 100);
+                
+                // 同时打开网页版作为最后的保障
+                // 使用setTimeout确保APP唤起有优先级
+                setTimeout(() => {
                     window.open(webUrl, '_blank');
-                }, 1000);
+                }, 100);
             } else {
                 // PC 端直接跳转网页
                 window.open(webUrl, '_blank');
