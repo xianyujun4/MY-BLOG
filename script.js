@@ -2085,3 +2085,68 @@ window.addEventListener('DOMContentLoaded', () => {
         attributes: true
     });
 });
+
+// 替换上面的返回键处理逻辑，使用更简单可靠的方案
+window.removeEventListener('DOMContentLoaded', window.__backButtonInit);
+window.__backButtonInit = function() {
+    // 简单可靠的返回键处理
+    let mainPageBackCount = 0;
+    const backTip = document.getElementById('back-button-tip');
+    let backTimeout = null;
+    
+    // 检测是否为主界面
+    function isMainPage() {
+        return !document.querySelector('.expanded-box') && !document.querySelector('.note-detail-container');
+    }
+    
+    // 重置计数
+    function resetCount() {
+        mainPageBackCount = 0;
+        if (backTimeout) {
+            clearTimeout(backTimeout);
+            backTimeout = null;
+        }
+        if (backTip) {
+            backTip.style.opacity = '0';
+        }
+    }
+    
+    // 处理返回键
+    function handleBack(e) {
+        e.preventDefault();
+        
+        const isMain = isMainPage();
+        
+        if (isMain) {
+            // 主界面
+            if (mainPageBackCount === 0) {
+                // 第一次
+                if (backTip) {
+                    backTip.textContent = '再按一次返回键退出';
+                    backTip.style.opacity = '1';
+                }
+                mainPageBackCount = 1;
+                backTimeout = setTimeout(resetCount, 2000);
+            } else {
+                // 第二次
+                window.history.go(-100);
+            }
+        } else {
+            // 非主界面，模拟ESC
+            resetCount();
+            const escEvent = new KeyboardEvent('keydown', {
+                key: 'Escape',
+                bubbles: true,
+                cancelable: true
+            });
+            document.dispatchEvent(escEvent);
+        }
+    }
+    
+    // 重新添加事件监听器
+    window.addEventListener('popstate', handleBack);
+    window.history.pushState(null, null, window.location.href);
+};
+
+// 重新初始化
+window.__backButtonInit();
