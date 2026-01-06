@@ -1002,100 +1002,24 @@ function showNewText(diamond) {
                     }, index * 30 + 100); // 每个框间隔30ms，整体延迟100ms
                 });
                 
-                // 解析网易云音乐链接，提取songId
-        const extractSongId = (link) => {
-            const match = link.match(/id=(\d+)/);
-            return match ? match[1] : null;
-        };
-        
-        // 检测设备类型
-        const getDeviceType = () => {
-            const userAgent = navigator.userAgent.toLowerCase();
-            if (/mobile|android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)) {
-                return 'mobile';
-            }
-            return 'pc';
-        };
-        
-        // 尝试唤起网易云音乐APP，失败则跳转网页
-        window.openNetEaseMusic = (link) => {
-            const songId = extractSongId(link);
-            if (!songId) {
-                // 如果无法解析songId，直接跳转原链接
-                window.open(link, '_blank');
-                return;
-            }
-            
-            const deviceType = getDeviceType();
-            const webUrl = `https://music.163.com/song?id=${songId}`;
-            
-            if (deviceType === 'mobile') {
-                // 移动端尝试唤起APP
-                // 使用标准的URL Scheme格式
-                const appUrl = `neteasecloudmusic://song?id=${songId}`; // 正确的URL Scheme格式应该包含id=参数
-                
-                console.log('尝试唤起网易云音乐APP，链接:', appUrl);
-                
-                try {
-                    // 1. 使用window.location.href直接跳转（最可靠的方式）
-                    window.location.href = appUrl;
-                    
-                    // 2. 添加a标签点击作为补充
-                    const aTag = document.createElement('a');
-                    aTag.href = appUrl;
-                    aTag.style.display = 'none';
-                    document.body.appendChild(aTag);
-                    
-                    // 确保在用户交互事件中执行点击
-                    if (typeof aTag.click === 'function') {
-                        aTag.click();
-                    }
-                    
-                    // 移除临时元素
-                    setTimeout(() => {
-                        if (aTag.parentNode) {
-                            aTag.parentNode.removeChild(aTag);
-                        }
-                    }, 100);
-                    
-                    // 3. 添加Universal Links作为备用（如果支持）
-                    const universalLink = `https://music.163.com/song/${songId}`;
-                    
-                    // 添加1000ms延迟后再打开网页版，给APP足够的唤醒时间
-                    // 延长延迟时间，确保APP有足够时间响应
-                    setTimeout(() => {
-                        console.log('APP唤醒超时，跳转网页版');
-                        window.open(webUrl, '_blank');
-                    }, 1000);
-                } catch (e) {
-                    console.error('唤醒失败:', e);
-                    // 发生错误时直接跳转网页版
-                    window.open(webUrl, '_blank');
-                }
-            } else {
-                // PC 端直接跳转网页
-                window.open(webUrl, '_blank');
-            }
-        };
-        
-        // 为所有框添加点击事件监听
-        boxes.forEach((box, index) => {
-            box.addEventListener('click', () => {
-                // 获取框的当前位置和尺寸
-                const rect = box.getBoundingClientRect();
-                
-                // 保存原框的样式，用于恢复
-                const originalBorder = box.style.border;
-                const originalBackground = box.style.background;
-                const originalZIndex = box.style.zIndex;
-                
-                // 创建一个setTimeout数组，用于存储所有的setTimeout ID，便于在关闭时清除
-                const timeouts = [];
-                
-                // 创建一个新的放大元素，而不是修改原元素
-                const expandedBox = document.createElement('div');
-                expandedBox.className = 'expanded-box';
-                expandedBox._timeouts = timeouts; // 将timeouts数组附加到expandedBox上，便于在closeHandler中访问
+                // 为所有框添加点击事件监听
+                boxes.forEach((box, index) => {
+                    box.addEventListener('click', () => {
+                        // 获取框的当前位置和尺寸
+                        const rect = box.getBoundingClientRect();
+                        
+                        // 保存原框的样式，用于恢复
+                        const originalBorder = box.style.border;
+                        const originalBackground = box.style.background;
+                        const originalZIndex = box.style.zIndex;
+                        
+                        // 创建一个setTimeout数组，用于存储所有的setTimeout ID，便于在关闭时清除
+                        const timeouts = [];
+                        
+                        // 创建一个新的放大元素，而不是修改原元素
+                        const expandedBox = document.createElement('div');
+                        expandedBox.className = 'expanded-box';
+                        expandedBox._timeouts = timeouts; // 将timeouts数组附加到expandedBox上，便于在closeHandler中访问
                         
                         // 获取原框内的文字内容
                         const boxText = box.querySelector('.box-text');
@@ -1406,7 +1330,7 @@ function showNewText(diamond) {
                                                                     </div>
                                                                     <div style="display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 0.9rem; color: #999;">
                                                                         <span>${item.date}</span>
-                                                                        <a href="javascript:void(0);" onclick="openNetEaseMusic('${item.link}')" style="color: var(--text-color); text-decoration: none; padding: 0; transition: all 0.3s ease;">
+                                                                        <a href="${item.link}" target="_blank" style="color: var(--text-color); text-decoration: none; padding: 0; transition: all 0.3s ease;">
                                                                             &gt;链接
                                                                         </a>
                                                                     </div>
