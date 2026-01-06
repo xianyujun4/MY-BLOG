@@ -1031,52 +1031,47 @@ function showNewText(diamond) {
             
             if (deviceType === 'mobile') {
                 // 移动端尝试唤起APP
-                const appUrl = `neteasecloudmusic://song/${songId}`;
+                // 使用标准的URL Scheme格式
+                const appUrl = `neteasecloudmusic://song?id=${songId}`; // 正确的URL Scheme格式应该包含id=参数
                 
-                // 激进的三重唤醒机制
+                console.log('尝试唤起网易云音乐APP，链接:', appUrl);
                 
-                // 1. 使用a标签点击方式（最可靠的方式之一）
-                const aTag = document.createElement('a');
-                aTag.href = appUrl;
-                aTag.style.display = 'none';
-                document.body.appendChild(aTag);
-                
-                // 模拟点击a标签
-                if (typeof aTag.click === 'function') {
-                    aTag.click();
-                } else {
-                    // 兼容旧浏览器
-                    const evt = document.createEvent('MouseEvents');
-                    evt.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-                    aTag.dispatchEvent(evt);
-                }
-                
-                // 2. 同时直接修改location.href
-                window.location.href = appUrl;
-                
-                // 3. 添加iframe方式作为补充
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = appUrl;
-                document.body.appendChild(iframe);
-                
-                // 不使用定时器检测，直接让浏览器处理
-                // 浏览器会在尝试唤起APP失败后自动跳转
-                // 设置一个非常短的延迟后移除iframe
-                setTimeout(() => {
-                    if (iframe.parentNode) {
-                        iframe.parentNode.removeChild(iframe);
+                try {
+                    // 1. 使用window.location.href直接跳转（最可靠的方式）
+                    window.location.href = appUrl;
+                    
+                    // 2. 添加a标签点击作为补充
+                    const aTag = document.createElement('a');
+                    aTag.href = appUrl;
+                    aTag.style.display = 'none';
+                    document.body.appendChild(aTag);
+                    
+                    // 确保在用户交互事件中执行点击
+                    if (typeof aTag.click === 'function') {
+                        aTag.click();
                     }
-                    if (aTag.parentNode) {
-                        aTag.parentNode.removeChild(aTag);
-                    }
-                }, 100);
-                
-                // 同时打开网页版作为最后的保障
-                // 使用setTimeout确保APP唤起有优先级
-                setTimeout(() => {
+                    
+                    // 移除临时元素
+                    setTimeout(() => {
+                        if (aTag.parentNode) {
+                            aTag.parentNode.removeChild(aTag);
+                        }
+                    }, 100);
+                    
+                    // 3. 添加Universal Links作为备用（如果支持）
+                    const universalLink = `https://music.163.com/song/${songId}`;
+                    
+                    // 添加1000ms延迟后再打开网页版，给APP足够的唤醒时间
+                    // 延长延迟时间，确保APP有足够时间响应
+                    setTimeout(() => {
+                        console.log('APP唤醒超时，跳转网页版');
+                        window.open(webUrl, '_blank');
+                    }, 1000);
+                } catch (e) {
+                    console.error('唤醒失败:', e);
+                    // 发生错误时直接跳转网页版
                     window.open(webUrl, '_blank');
-                }, 100);
+                }
             } else {
                 // PC 端直接跳转网页
                 window.open(webUrl, '_blank');
