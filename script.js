@@ -1980,71 +1980,108 @@ function showNewText(diamond) {
     }
 }
 
-// 手机端返回键处理
+// 手机端返回键处理 - 暴力解法
 window.addEventListener('DOMContentLoaded', () => {
-    let lastBackPressTime = 0;
-    let isMainPage = true;
+    // 暴力解法：完全重写返回键处理逻辑
+    // 仅在主界面维护退出计数，非主界面完全忽略
     
-    // 监听页面状态变化，判断是否在主界面
-    function updatePageStatus() {
-        // 检查是否有展开的页面或详情页
-        const expandedBox = document.querySelector('.expanded-box');
-        const noteDetailContainer = document.querySelector('.note-detail-container');
-        isMainPage = !expandedBox && !noteDetailContainer;
+    // 主界面退出计数变量，仅在主界面有效
+    let mainPageBackPressCount = 0;
+    let mainPageBackPressTimeout = null;
+    
+    // 主界面返回键提示元素
+    const backTip = document.getElementById('back-button-tip');
+    
+    // 清除主界面返回键计数和提示
+    function clearMainPageBackPress() {
+        mainPageBackPressCount = 0;
+        if (mainPageBackPressTimeout) {
+            clearTimeout(mainPageBackPressTimeout);
+            mainPageBackPressTimeout = null;
+        }
+        if (backTip) {
+            backTip.style.opacity = '0';
+        }
     }
     
-    // 监听popstate事件处理返回键
-    window.addEventListener('popstate', (e) => {
-        e.preventDefault(); // 阻止默认的浏览器返回行为
-        
-        // 直接在事件触发时检测页面状态，不依赖于之前的状态变量
-        const expandedBox = document.querySelector('.expanded-box');
-        const noteDetailContainer = document.querySelector('.note-detail-container');
-        
-        // 只有当没有打开的预览页且没有详情页时，才是主界面
-        const isMainPageNow = !expandedBox && !noteDetailContainer;
-        
-        console.log('Return key pressed:', {
-            expandedBox: !!expandedBox,
-            noteDetailContainer: !!noteDetailContainer,
-            isMainPageNow: isMainPageNow
-        });
-        
-        if (isMainPageNow) {
-            // 在主界面，处理两次返回退出
-            const now = Date.now();
-            if (now - lastBackPressTime < 2000) {
-                // 两次返回间隔小于2秒，退出网站
-                window.history.go(-100); // 强制退出
-            } else {
-                // 第一次返回，显示提示
-                const tip = document.getElementById('back-button-tip');
-                tip.textContent = '再按一次返回键退出';
-                tip.style.opacity = '1';
-                
-                // 2秒后隐藏提示
-                setTimeout(() => {
-                    tip.style.opacity = '0';
-                }, 2000);
-                
-                // 只有在主界面点击返回键时，才更新lastBackPressTime
-                lastBackPressTime = now;
+    // 暴力检测：是否为主界面
+    function isMainPage() {
+        // 直接检查DOM，不存在任何预览页或详情页就是主界面
+        const hasExpandedBox = !!document.querySelector('.expanded-box');
+        const hasDetailContainer = !!document.querySelector('.note-detail-container');
+        return !hasExpandedBox && !hasDetailContainer;
+    }
+    
+    // 主界面返回键处理
+    function handleMainPageBack() {
+        if (mainPageBackPressCount === 0) {
+            // 第一次点击，显示提示
+            if (backTip) {
+                backTip.textContent = '再按一次返回键退出';
+                backTip.style.opacity = '1';
             }
-        } else {
-            // 不在主界面，模拟ESC键效果
-            console.log('Simulating ESC key press');
-            const escEvent = new KeyboardEvent('keydown', {
-                key: 'Escape',
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(escEvent);
+            mainPageBackPressCount = 1;
             
-            // 非主界面点击返回键时，不更新lastBackPressTime
-            // 这样只有在主界面连续点击两次返回键才会触发退出
+            // 2秒后重置计数
+            mainPageBackPressTimeout = setTimeout(() => {
+                clearMainPageBackPress();
+            }, 2000);
+        } else {
+            // 第二次点击，退出网站
+            window.history.go(-100); // 强制退出
         }
-    });
+    }
+    
+    // 非主界面返回键处理
+    function handleNonMainPageBack() {
+        // 非主界面，直接模拟ESC键，不处理退出计数
+        const escEvent = new KeyboardEvent('keydown', {
+            key: 'Escape',
+            bubbles: true,
+            cancelable: true
+        });
+        document.dispatchEvent(escEvent);
+    }
+    
+    // 暴力重写返回键处理函数
+    const backButtonHandler = (e) => {
+        e.preventDefault(); // 阻止默认浏览器返回行为
+        
+        console.log('=== BACK BUTTON PRESSED ===');
+        
+        // 暴力检测当前页面状态
+        const currentIsMainPage = isMainPage();
+        console.log('Current page:', currentIsMainPage ? 'MAIN' : 'NON-MAIN');
+        
+        if (currentIsMainPage) {
+            // 主界面：处理退出计数
+            console.log('Handling main page back');
+            handleMainPageBack();
+        } else {
+            // 非主界面：仅模拟ESC键，完全忽略退出计数
+            console.log('Handling non-main page back, simulating ESC');
+            handleNonMainPageBack();
+        }
+    };
+    
+    // 添加新的事件监听器
+    window.addEventListener('popstate', backButtonHandler);
     
     // 初始化pushState，确保返回键能被监听
     window.history.pushState(null, null, window.location.href);
+    
+    // 监听页面变化，清除主界面返回计数
+    // 当从非主界面返回主界面时，重置计数
+    const observer = new MutationObserver(() => {
+        if (isMainPage()) {
+            clearMainPageBackPress();
+        }
+    });
+    
+    // 观察body变化，检测页面切换
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true
+    });
 });
