@@ -1579,7 +1579,7 @@ function showNewText(diamond) {
                                             <div class="avatar-content" style="display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 40px; flex-wrap: wrap;">
                                                 <!-- 左侧头像 -->
                                                 <div class="avatar-container" style="flex-shrink: 0;">
-                                                    <img src="https://avatars.githubusercontent.com/u/79352027"
+                                                    <img src="https://p3-pc-sign.douyinpic.com/aweme-avatar/tos-cn-i-c9aec8xkvj_e2d3d20ddd4c4e3db22eb5d5bcc75b14~tplv-8yspqt5zfm-300x300.webp?lk3s=93de098e&x-expires=1767679200&x-signature=%2FcfKt%2B%2FMudHbRPtQZe9SG9xefe0%3D&from=2480802190&s=profile&se=false&sc=avatar&l=202601041431441732686B9F282B93D889" 
                                                         alt="头像" 
                                                         style="width: 200px; height: 200px; border-radius: 8px; object-fit: cover; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);">
                                                 </div>
@@ -1644,8 +1644,107 @@ function showNewText(diamond) {
                                         aboutContainer.style.opacity = '1';
                                         aboutContainer.style.transform = 'translateY(0)';
                                     }, 900)); // 文字动画后延迟300ms
+                                } else if (index === 2) {
+                                    // 第三个框（NULL）：特殊样式
+                                    // 创建NULL内容容器
+                                    const nullContainer = document.createElement('div');
+                                    nullContainer.className = 'null-container';
+                                    nullContainer.style.position = 'absolute';
+                                    nullContainer.style.top = '0';
+                                    nullContainer.style.left = '0';
+                                    nullContainer.style.width = '100%';
+                                    nullContainer.style.height = '100%';
+                                    nullContainer.style.display = 'flex';
+                                    nullContainer.style.flexDirection = 'column';
+                                    nullContainer.style.justifyContent = 'center';
+                                    nullContainer.style.alignItems = 'center';
+                                    nullContainer.style.zIndex = '99999';
+                                    
+                                    // 创建顶部线条
+                                    const topLine = document.createElement('div');
+                                    topLine.className = 'null-line top';
+                                    topLine.style.height = '1px';
+                                    topLine.style.backgroundColor = 'var(--text-color)';
+                                    topLine.style.width = '0';
+                                    topLine.style.marginBottom = '20px';
+                                    topLine.style.transformOrigin = 'left center';
+                                    
+                                    // 创建文字容器
+                                    const textContainer = document.createElement('div');
+                                    textContainer.className = 'null-text-container';
+                                    textContainer.style.textAlign = 'center';
+                                    textContainer.style.overflow = 'hidden';
+                                    
+                                    // 创建第一段文字
+                                    const firstText = document.createElement('div');
+                                    firstText.className = 'null-text first';
+                                    firstText.textContent = 'Nothing here.';
+                                    firstText.style.fontFamily = 'Courier New, monospace';
+                                    firstText.style.fontSize = '2rem';
+                                    firstText.style.fontWeight = '700';
+                                    firstText.style.color = 'var(--text-color)';
+                                    firstText.style.marginBottom = '10px';
+                                    firstText.style.opacity = '0';
+                                    firstText.style.transform = 'translateX(-100%)';
+                                    firstText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-out';
+                                    
+                                    // 创建第二段文字
+                                    const secondText = document.createElement('div');
+                                    secondText.className = 'null-text second';
+                                    secondText.textContent = 'Everything implied.';
+                                    secondText.style.fontFamily = 'Courier New, monospace';
+                                    secondText.style.fontSize = '2rem';
+                                    secondText.style.fontWeight = '700';
+                                    secondText.style.color = 'var(--text-color)';
+                                    secondText.style.opacity = '0';
+                                    secondText.style.transform = 'translateX(-100%)';
+                                    secondText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-out';
+                                    
+                                    // 创建底部线条
+                                    const bottomLine = document.createElement('div');
+                                    bottomLine.className = 'null-line bottom';
+                                    bottomLine.style.height = '1px';
+                                    bottomLine.style.backgroundColor = 'var(--text-color)';
+                                    bottomLine.style.width = '0';
+                                    bottomLine.style.marginTop = '20px';
+                                    bottomLine.style.transformOrigin = 'left center';
+                                    
+                                    // 组装元素
+                                    textContainer.appendChild(firstText);
+                                    textContainer.appendChild(secondText);
+                                    nullContainer.appendChild(topLine);
+                                    nullContainer.appendChild(textContainer);
+                                    nullContainer.appendChild(bottomLine);
+                                    expandedBox.appendChild(nullContainer);
+                                    
+                                    // 触发入场动画
+                                    // 1. 等待放大动画完成
+                                    timeouts.push(setTimeout(() => {
+                                        // 2. 计算文字宽度
+                                        const textWidth = textContainer.offsetWidth;
+                                        
+                                        // 3. 线条从左到右动画
+                                        topLine.style.transition = 'width 0.8s ease';
+                                        bottomLine.style.transition = 'width 0.8s ease';
+                                        topLine.style.width = textWidth + 'px';
+                                        bottomLine.style.width = textWidth + 'px';
+                                        
+                                        // 4. 线条动画开始后延迟，文字从左到右出现
+                                        timeouts.push(setTimeout(() => {
+                                            firstText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-out';
+                                            firstText.style.opacity = '1';
+                                            firstText.style.transform = 'translateX(0)';
+                                            
+                                            // 5. 第一段文字出现后，第二段文字出现
+                                            timeouts.push(setTimeout(() => {
+                                                secondText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-out';
+                                                secondText.style.opacity = '1';
+                                                secondText.style.transform = 'translateX(0)';
+                                            }, 200));
+                                        }, 300));
+                                    }, 600));
                                 } else {
-                                    // 其他框（TEST2、TEST3）：删除飞入的线条，只保留文字动画
+                                    // 其他框：删除飞入的线条，只保留文字动画
                                     // 创建新的文字容器
                                     const textContainer = document.createElement('div');
                                     textContainer.className = 'new-text-container';
@@ -1777,10 +1876,14 @@ function showNewText(diamond) {
                                 return;
                             }
                             
-                            // 只有点击expandedBox本身（空白区域）或通过ESC键调用时才执行退出操作
+                            // 只有点击expandedBox本身（空白区域）或NULL页面的容器/子元素，或通过ESC键调用时才执行退出操作
                             // 如果是ESC键调用，e可能是键盘事件，此时e.target不是expandedBox
-                            if (e && e.type === 'click' && e.target !== expandedBox) {
-                                return;
+                            if (e && e.type === 'click') {
+                                // 检查是否点击了expandedBox或NULL页面的元素
+                                const isNullContainer = e.target.classList.contains('null-container') || e.target.closest('.null-container');
+                                if (e.target !== expandedBox && !isNullContainer) {
+                                    return;
+                                }
                             }
                             
                             // 清除所有未执行的定时器，中断进入动画
@@ -1870,84 +1973,145 @@ function showNewText(diamond) {
                                     }, 300); // 笔记消失动画时长0.3秒
                                 }, 300); // 文字和线条动画时长0.3秒
                             } else {
-                                // 其他框：文字先向左飞出，然后界面缩小
-                                // 获取新文字元素
-                                const newText = expandedBox.querySelector('.new-text');
-                                
-                                if (newText) {
-                                    // 1. 文字向左飞出动画，时长0.3秒
-                                    newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
-                                    newText.style.opacity = '0';
-                                    newText.style.transform = 'translateX(-100%)';
+                                // 检查是否是NULL页面
+                                const nullContainer = expandedBox.querySelector('.null-container');
+                                if (nullContainer) {
+                                    // NULL页面出场动画：与入场顺序相反
+                                    // 1. 文字先向右消失
+                                    const firstText = expandedBox.querySelector('.null-text.first');
+                                    const secondText = expandedBox.querySelector('.null-text.second');
+                                    const topLine = expandedBox.querySelector('.null-line.top');
+                                    const bottomLine = expandedBox.querySelector('.null-line.bottom');
                                     
-                                    // 2. 文字动画完成后，执行内容淡出动画（如果是关于页）
+                                    // 文字向右消失
+                                    secondText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-in';
+                                    secondText.style.opacity = '0';
+                                    secondText.style.transform = 'translateX(100%)';
+                                    
+                                    // 第一段文字延迟消失
                                     setTimeout(() => {
-                                        // 检查是否是关于页
-                                        const aboutContainer = expandedBox.querySelector('.about-container');
-                                        if (aboutContainer) {
-                                            aboutContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
-                                            aboutContainer.style.opacity = '0';
-                                            aboutContainer.style.transform = 'translateY(20px)';
-                                        }
+                                        firstText.style.transition = 'opacity 0.5s ease, transform 0.5s ease-in';
+                                        firstText.style.opacity = '0';
+                                        firstText.style.transform = 'translateX(100%)';
                                         
-                                        // 3. 内容淡出完成后，执行框缩小动画
+                                        // 2. 文字动画开始后，线条从右向左消失
                                         setTimeout(() => {
-                                            // 开始缩小动画，与放大逻辑一致
-                                            expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                            topLine.style.transformOrigin = 'right center';
+                                            bottomLine.style.transformOrigin = 'right center';
+                                            topLine.style.width = '0';
+                                            bottomLine.style.width = '0';
                                             
-                                            // 强制浏览器重排，确保动画能正确触发
-                                            expandedBox.offsetHeight;
-                                            
-                                            // 开始缩小动画
+                                            // 3. 线条动画完成后，执行框缩小动画
                                             setTimeout(() => {
-                                                expandedBox.style.top = `${rect.top}px`;
-                                                expandedBox.style.left = `${rect.left}px`;
-                                                expandedBox.style.width = `${rect.width}px`;
-                                                expandedBox.style.height = `${rect.height}px`;
-                                                // 缩小过程中保持边框可见，不立即设置opacity
-                                            }, 10);
-                                            
-                                            // 缩小动画结束后（0.5秒），设置透明度并移除元素
-                                            setTimeout(() => {
-                                                expandedBox.style.opacity = '0';
+                                                // 开始缩小动画，与放大逻辑一致
+                                                expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
                                                 
-                                                // 延迟移除元素，确保透明度动画完成
+                                                // 强制浏览器重排，确保动画能正确触发
+                                                expandedBox.offsetHeight;
+                                                
+                                                // 开始缩小动画
                                                 setTimeout(() => {
-                                                    if (expandedBox.parentNode) {
-                                                        expandedBox.parentNode.removeChild(expandedBox);
-                                                    }
-                                                }, 100);
-                                            }, 500);
-                                        }, 300); // 内容淡出动画时长0.3秒
-                                    }, 300); // 文字飞出动画时长0.3秒
+                                                    expandedBox.style.top = `${rect.top}px`;
+                                                    expandedBox.style.left = `${rect.left}px`;
+                                                    expandedBox.style.width = `${rect.width}px`;
+                                                    expandedBox.style.height = `${rect.height}px`;
+                                                    // 缩小过程中保持边框可见，不立即设置opacity
+                                                }, 10);
+                                                
+                                                // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                                setTimeout(() => {
+                                                    expandedBox.style.opacity = '0';
+                                                    
+                                                    // 延迟移除元素，确保透明度动画完成
+                                                    setTimeout(() => {
+                                                        if (expandedBox.parentNode) {
+                                                            expandedBox.parentNode.removeChild(expandedBox);
+                                                        }
+                                                    }, 100);
+                                                }, 500);
+                                            }, 500); // 线条动画时长0.5秒
+                                        }, 200); // 第一段文字动画开始后0.2秒开始线条动画
+                                    }, 200); // 第二段文字动画开始后0.2秒开始第一段文字动画
                                 } else {
-                                    // 如果没有新文字元素，直接执行缩小动画
-                                    // 开始缩小动画，与放大逻辑一致
-                                    expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                    // 其他框：文字先向左飞出，然后界面缩小
+                                    // 获取新文字元素
+                                    const newText = expandedBox.querySelector('.new-text');
                                     
-                                    // 强制浏览器重排，确保动画能正确触发
-                                    expandedBox.offsetHeight;
-                                    
-                                    // 开始缩小动画
-                                    setTimeout(() => {
-                                        expandedBox.style.top = `${rect.top}px`;
-                                        expandedBox.style.left = `${rect.left}px`;
-                                        expandedBox.style.width = `${rect.width}px`;
-                                        expandedBox.style.height = `${rect.height}px`;
-                                        // 缩小过程中保持边框可见，不立即设置opacity
-                                    }, 10);
-                                    
-                                    // 缩小动画结束后（0.5秒），设置透明度并移除元素
-                                    setTimeout(() => {
-                                        expandedBox.style.opacity = '0';
+                                    if (newText) {
+                                        // 1. 文字向左飞出动画，时长0.3秒
+                                        newText.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                        newText.style.opacity = '0';
+                                        newText.style.transform = 'translateX(-100%)';
                                         
-                                        // 延迟移除元素，确保透明度动画完成
+                                        // 2. 文字动画完成后，执行内容淡出动画（如果是关于页）
                                         setTimeout(() => {
-                                            if (expandedBox.parentNode) {
-                                                expandedBox.parentNode.removeChild(expandedBox);
+                                            // 检查是否是关于页
+                                            const aboutContainer = expandedBox.querySelector('.about-container');
+                                            if (aboutContainer) {
+                                                aboutContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease-in';
+                                                aboutContainer.style.opacity = '0';
+                                                aboutContainer.style.transform = 'translateY(20px)';
                                             }
-                                        }, 100);
-                                    }, 500);
+                                            
+                                            // 3. 内容淡出完成后，执行框缩小动画
+                                            setTimeout(() => {
+                                                // 开始缩小动画，与放大逻辑一致
+                                                expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                                
+                                                // 强制浏览器重排，确保动画能正确触发
+                                                expandedBox.offsetHeight;
+                                                
+                                                // 开始缩小动画
+                                                setTimeout(() => {
+                                                    expandedBox.style.top = `${rect.top}px`;
+                                                    expandedBox.style.left = `${rect.left}px`;
+                                                    expandedBox.style.width = `${rect.width}px`;
+                                                    expandedBox.style.height = `${rect.height}px`;
+                                                    // 缩小过程中保持边框可见，不立即设置opacity
+                                                }, 10);
+                                                
+                                                // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                                setTimeout(() => {
+                                                    expandedBox.style.opacity = '0';
+                                                    
+                                                    // 延迟移除元素，确保透明度动画完成
+                                                    setTimeout(() => {
+                                                        if (expandedBox.parentNode) {
+                                                            expandedBox.parentNode.removeChild(expandedBox);
+                                                        }
+                                                    }, 100);
+                                                }, 500);
+                                            }, 300); // 内容淡出动画时长0.3秒
+                                        }, 300); // 文字飞出动画时长0.3秒
+                                    } else {
+                                        // 如果没有新文字元素，直接执行缩小动画
+                                        // 开始缩小动画，与放大逻辑一致
+                                        expandedBox.style.zIndex = '100'; // 确保缩小过程中原框可见
+                                        
+                                        // 强制浏览器重排，确保动画能正确触发
+                                        expandedBox.offsetHeight;
+                                        
+                                        // 开始缩小动画
+                                        setTimeout(() => {
+                                            expandedBox.style.top = `${rect.top}px`;
+                                            expandedBox.style.left = `${rect.left}px`;
+                                            expandedBox.style.width = `${rect.width}px`;
+                                            expandedBox.style.height = `${rect.height}px`;
+                                            // 缩小过程中保持边框可见，不立即设置opacity
+                                        }, 10);
+                                        
+                                        // 缩小动画结束后（0.5秒），设置透明度并移除元素
+                                        setTimeout(() => {
+                                            expandedBox.style.opacity = '0';
+                                            
+                                            // 延迟移除元素，确保透明度动画完成
+                                            setTimeout(() => {
+                                                if (expandedBox.parentNode) {
+                                                    expandedBox.parentNode.removeChild(expandedBox);
+                                                }
+                                            }, 100);
+                                        }, 500);
+                                    }
                                 }
                             }
                         };
@@ -2150,4 +2314,3 @@ window.__backButtonInit = function() {
 
 // 重新初始化
 window.__backButtonInit();
-
